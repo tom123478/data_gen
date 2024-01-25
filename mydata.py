@@ -3,16 +3,15 @@ import json
 from PIL import Image
 from pathlib import Path
 
-# Process AiHub 야외실제촬영 이미지 
+# AiHub 야외실제촬영 이미지 
 datapath = "c:/Data/kor/"
-path1 = datapath + "[라벨]Training/2.책표지/"
-path2 = datapath + "[원천]Training/"
+path1 = datapath + "[라벨]]Training/2.책표지/"
+path2 = datapath + "[원천]Training/2.책표지/"
 
 titles = ["가로형간판","01.총류","02.철학","03.종교","04.사회과학","05.자연과학","06.기술과학","07.예술","08.언어","09.문학","10.역사","11.기타"]
-category = titles[2]  ###
+category = titles[3]  ###
 folder1 = path1 + category + "/"
 folder2 = path2 + category + "/"
-folder3 = "C:/Data/kor/temp/" + category + "/"
 
 mode = "train3" ###
 outimpath = datapath + "out/" + mode + "/temp/"
@@ -36,20 +35,40 @@ def png2jpg():
         im.save(newfile)
         num += 1
     print(str(num) + ' files finished')
- 
+
+
+def delete_image(num):
+    if num == 0:
+        extension = '*.jpg'
+    else:
+        extension = '*.png'
+    for file in Path(folder2).glob(extension):
+        os.remove(file)
+    print(extension, " deleted.")
+
 
 def check_image_orientation():
     dir2 = os.listdir(folder2)
-    for i, item in enumerate(dir2):
-        imfile = folder2 + item
-        try:
-            im = Image.open(imfile)
-        except IOError:
-            print("IO Error", imfile)
-        else:
-            width, height = im.size
-            if height > width:
-                print("Orientation not right: ", item, str(width), " x ", str(height))
+    num = 0
+    with open(folder2+"_vertical.txt", 'w', encoding="utf-8") as fo:
+                    
+        for i, item in enumerate(dir2):
+            imfile = folder2 + item
+            try:
+                im = Image.open(imfile)
+            except IOError:
+                print("IO Error", imfile)
+            else:
+                width, height = im.size
+                if height > width:
+                    num += 1
+                    print("Orientation not right: ", item, str(width), " x ", str(height))
+                    fo.write(item+ "\n")
+                    newfile = folder2 + item
+                    im2 = im.rotate(90,expand=1)
+                    im2.save(newfile)
+        print(num, " files were vertically oriented")
+    fo.close()
 
 
 def read_label(file, prevtext1):
@@ -159,16 +178,21 @@ def text_subset():
             cropimage_writetxt(imfile, outimpath, texts, boxes)
             prevtext = text1
 
-# Step 1. Convert to png images
-# jpg2png()
 
-# Step 2. Manually realign image in correct orientation.
+# Step 1. Convert to png images
+jpg2png()
+            
+# Step 2. Delete jpg images.
+# delete_image(0) 
         
-# Step 3. After step 2 is done, check if orientation is right.
+# Step 3. After step 2 is done, check if orientation is right. Manually realign image in correct orientation.
 # check_image_orientation()
             
 # Step 4. convert to jpg images
 # png2jpg()
-            
+
+# Step 5. Delete png images
+# delete_image(1)    
+
 # Step 4. Prepare SimpleDataset according to label/image pairs.
-text_subset()
+# text_subset()
