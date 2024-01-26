@@ -5,11 +5,11 @@ from pathlib import Path
 
 # AiHub 야외실제촬영 이미지 
 datapath = "c:/Data/kor/"
-path1 = datapath + "[라벨]]Training/2.책표지/"
-path2 = datapath + "[원천]Training/2.책표지/"
+path1 = datapath + "[라벨]]Training/2.책표지/"  # 라벨
+path2 = datapath + "[원천]Training/2.책표지/"   # 이미지
 
 titles = ["가로형간판","01.총류","02.철학","03.종교","04.사회과학","05.자연과학","06.기술과학","07.예술","08.언어","09.문학","10.역사","11.기타"]
-category = titles[3]  ###
+category = titles[8]  ### change for each iteration
 folder1 = path1 + category + "/"
 folder2 = path2 + category + "/"
 
@@ -18,22 +18,28 @@ outimpath = datapath + "out/" + mode + "/temp/"
 
 def jpg2png(): 
     num = 0
+    print(folder2 + " processing...")
     for file in Path(folder2).glob('*.jpg'):
         im = Image.open(file)
         newfile = file.parent/(file.stem + '.png')
         # print(file)
         im.save(newfile)
         num += 1
+        if num%500 == 0: 
+            print(num)
     print(str(num) + ' files finished')
 
 def png2jpg(): 
     num = 0
+    print(folder2 + " processing...")
     for file in Path(folder2).glob('*.png'):
         im = Image.open(file)
         newfile = file.parent/(file.stem + '.jpg')
         # print(file)
         im.save(newfile)
         num += 1
+        if num%500 == 0: 
+            print(num)
     print(str(num) + ' files finished')
 
 
@@ -44,7 +50,7 @@ def delete_image(num):
         extension = '*.png'
     for file in Path(folder2).glob(extension):
         os.remove(file)
-    print(extension, " deleted.")
+    print(folder2 + " " + extension, " deleted.")
 
 
 def check_image_orientation():
@@ -162,9 +168,7 @@ def text_subset():
     try:
         os.makedirs(outimpath)
     except:
-        print("Run text_subset ", folder2)
-        
-
+        print("Run text_subset ", folder2)  
     dir1 = os.listdir(folder1)
     prevtext = ""
     for i, item in enumerate(dir1):
@@ -179,19 +183,15 @@ def text_subset():
             prevtext = text1
 
 
-# Step 1. Convert to png images
+# Step 1. Convert to png images (30분 정도 걸림) and delete jpg images.
 jpg2png()
-            
-# Step 2. Delete jpg images.
-# delete_image(0) 
+delete_image(0) 
         
-# Step 3. After step 2 is done, check if orientation is right. Manually realign image in correct orientation.
-# check_image_orientation()
+# Step 2. Check if orientation is right. Manually realign image in correct orientation.
+check_image_orientation()
             
-# Step 4. convert to jpg images
+# Step 3. convert to jpg images and delete png images
 # png2jpg()
-
-# Step 5. Delete png images
 # delete_image(1)    
 
 # Step 4. Prepare SimpleDataset according to label/image pairs.
