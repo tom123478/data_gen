@@ -71,7 +71,7 @@ def words_from_dicts():
             # f.write("\n")
     f.close()
 
-words_from_dicts()
+# words_from_dicts()
                 
 def words_from_novel():
     file = ''

@@ -1,9 +1,6 @@
 import random as rnd
 import re
 import string
-import requests
-
-from bs4 import BeautifulSoup
 
 def create_strings_from_file(filename, count, mini=10, maxi=40):
     """
@@ -48,38 +45,6 @@ def create_strings_from_dict(length, allow_variable, count, lang_dict):
         strings.append(lang_dict[n])
     return strings
 
-
-def create_strings_from_wikipedia(minimum_length, count, lang):
-    """
-        Create all string by randomly picking Wikipedia articles and taking sentences from them.
-    """
-    sentences = []
-
-    while len(sentences) < count:
-        # We fetch a random page
-        page = requests.get('https://{}.wikipedia.org/wiki/Special:Random'.format(lang))
-        # page = requests.get('https://support.google.com/blogger/answer/1623800?hl=ko')
-
-        soup = BeautifulSoup(page.text, 'html.parser')
-
-        for script in soup(["script", "style"]):
-            script.extract()
-
-        # Only take a certain length
-        lines = list(filter(
-            lambda s:
-                len(s.split(' ')) > minimum_length
-                and not "Wikipedia" in s
-                and not "wikipedia" in s,
-            [
-                ' '.join(re.findall(r"[\w']+", s.strip()))[0:200] for s in soup.get_text().splitlines()
-            ]
-        ))
-
-        # Remove the last lines that talks about contributing
-        sentences.extend(lines[0:max([1, len(lines) - 5])])
-
-    return sentences[0:count]
 
 def create_strings_randomly(length, allow_variable, count, let, num, sym, lang):
     """

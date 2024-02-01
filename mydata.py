@@ -184,11 +184,11 @@ def text_subset():
 
 
 # Step 1. Convert to png images (30분 정도 걸림) and delete jpg images.
-jpg2png()
-delete_image(0) 
+# jpg2png()
+# delete_image(0) 
         
 # Step 2. Check if orientation is right. Manually realign image in correct orientation.
-check_image_orientation()
+# check_image_orientation()
             
 # Step 3. convert to jpg images and delete png images
 # png2jpg()

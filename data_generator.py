@@ -7,11 +7,7 @@ from pathlib import Path
 
 import computer_text_generator
 import background_generator
-import distorsion_generator
-try:
-    import handwritten_text_generator
-except ImportError as e:
-    print('Missing modules for handwritten text generation.')
+import distortion_generator
 
 def rotate_bboxes(bboxes, degree, rc):
     def rotate_pts(pts, expand):
@@ -55,7 +51,7 @@ class FakeTextDataGenerator(object):
         cls.generate(*t)
 
     @classmethod
-    def generate(cls, index, text, font, out_dir, pre, size, extension, skewing_angle, random_skew, blur, random_blur, background_type, distorsion_type, distorsion_orientation, is_handwritten, name_format, width, alignment, text_color, orientation, space_width, margins, fit, is_bbox, label_only, bgcolor, strokewidth, strokefill):
+    def generate(cls, index, text, font, out_dir, pre, size, extension, skewing_angle, random_skew, blur, random_blur, background_type, distortion_type, distortion_orientation, is_handwritten, name_format, width, alignment, text_color, orientation, space_width, margins, fit, is_bbox, label_only, bgcolor, strokewidth, strokefill):
         image = None
 
         margin_top, margin_left, margin_bottom, margin_right = margins
@@ -83,27 +79,27 @@ class FakeTextDataGenerator(object):
         rotated_bboxes = rotate_bboxes(bboxes, skewing_angle if not random_skew else random_angle, rc)
 
         #############################
-        # Apply distorsion to image #
+        # Apply distortion to image #
         #############################
-        if distorsion_type == 0:
+        if distortion_type == 0:
             distorted_img = rotated_img # Mind = blown
-        elif distorsion_type == 1:
-            distorted_img = distorsion_generator.sin(
+        elif distortion_type == 1:
+            distorted_img = distortion_generator.sin(
                 rotated_img,
-                vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
-                horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2)
+                vertical=(distortion_orientation == 0 or distortion_orientation == 2),
+                horizontal=(distortion_orientation == 1 or distortion_orientation == 2)
             )
-        elif distorsion_type == 2:
-            distorted_img = distorsion_generator.cos(
+        elif distortion_type == 2:
+            distorted_img = distortion_generator.cos(
                 rotated_img,
-                vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
-                horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2)
+                vertical=(distortion_orientation == 0 or distortion_orientation == 2),
+                horizontal=(distortion_orientation == 1 or distortion_orientation == 2)
             )
         else:
-            distorted_img = distorsion_generator.random(
+            distorted_img = distortion_generator.random(
                 rotated_img,
-                vertical=(distorsion_orientation == 0 or distorsion_orientation == 2),
-                horizontal=(distorsion_orientation == 1 or distorsion_orientation == 2)
+                vertical=(distortion_orientation == 0 or distortion_orientation == 2),
+                horizontal=(distortion_orientation == 1 or distortion_orientation == 2)
             )
 
         ##################################

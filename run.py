@@ -10,7 +10,6 @@ from tqdm import tqdm
 from string_generator import (
     create_strings_from_dict,
     create_strings_from_file,
-    create_strings_from_wikipedia,
     create_strings_randomly
 )
 from data_generator import FakeTextDataGenerator
@@ -34,7 +33,7 @@ def parse_arguments():
         type=str,
         nargs="?",
         help="The output directory",
-        default="C:/Data/kor/kor3/",
+        default="/home/jw/data/ocr/kor3/",
     )    
     parser.add_argument(
         "-i",
@@ -150,13 +149,6 @@ def parse_arguments():
         default=True,
     )
     parser.add_argument(
-        "-wk",
-        "--use_wikipedia",
-        action="store_true",
-        help="Use Wikipedia as the source text for the generation, using this paremeter ignores -r, -n, -s",
-        default=False,
-    )
-    parser.add_argument(
         "-bl",
         "--blur",
         type=int,
@@ -188,18 +180,18 @@ def parse_arguments():
     )
     parser.add_argument(
         "-d",
-        "--distorsion",
+        "--distortion",
         type=int,
         nargs="?",
-        help="Define a distorsion applied to the resulting image. 0: None (Default), 1: Sine wave, 2: Cosine wave, 3: Random",
+        help="Define a distortion applied to the resulting image. 0: None (Default), 1: Sine wave, 2: Cosine wave, 3: Random",
         default=0
     )
     parser.add_argument(
         "-do",
-        "--distorsion_orientation",
+        "--distortion_orientation",
         type=int,
         nargs="?",
-        help="Define the distorsion's orientation. Only used if -d is specified. 0: Vertical (Up and down), 1: Horizontal (Left and Right), 2: Both",
+        help="Define the distortion's orientation. Only used if -d is specified. 0: Vertical (Up and down), 1: Horizontal (Left and Right), 2: Both",
         default=2
     )
     parser.add_argument(
@@ -311,7 +303,7 @@ def make_dict(lang, inp):
             for token in re.sub(r, ' ', line.strip()).split(' '):
                 d.add(token)
 
-    with (Path('C:/Data/kor/out') / (lang + '_new.txt')).open('w', encoding="utf8", errors='ignore') as f:
+    with (Path('/home/jw/data/ocr/kor3/out') / (lang + '_new.txt')).open('w', encoding="utf8", errors='ignore') as f:
         for token in d:
             f.write(token+'\n')
 
@@ -319,14 +311,14 @@ def load_fonts(lang):
     """
         Load all fonts in the fonts directories
     """
-    return [str(font) for font in (Path('C:/Code/Open-OCR-Engine/generate_data/fonts') / lang).glob('*')]
+    return [str(font) for font in (Path('/home/jw/code/ocrdata/fonts') / lang).glob('*')]
 
 def load_dict(lang):
     """
         Read the dictionnary file and returns all words in it.
     """
     lang_dict = []   ### change the input ko.txt file
-    with (Path('C:/Data/kor/kor3/eng words.txt')).open('r', encoding="utf8", errors='ignore') as d:
+    with (Path('/home/jw/data/ocr/kor3/eng words.txt')).open('r', encoding="utf8", errors='ignore') as d:
         lang_dict = [l for l in d.read().splitlines() if len(l) > 0]
     return lang_dict
 
@@ -372,11 +364,9 @@ def main():
     #     print(fonts[i])
     
     # Creating synthetic sentences (or word)
-    strings = []
-    if args.use_wikipedia:
-        print("1. using wikipedia")
-        strings = create_strings_from_wikipedia(args.length, args.count, args.language)
-    elif args.input_file != '':
+    strings = []   
+
+    if args.input_file != '':
         print("2. using ", args.input_file)
         strings = create_strings_from_file(args.input_file, args.count, args.min_char, args.max_char)
     elif args.random_sequences:
@@ -424,8 +414,8 @@ def main():
             [args.blur] * string_count,
             [args.random_blur] * string_count,
             [1] * string_count,   ### background type 0: Gaussian Noise, 1: Plain color, 2: Quasicrystal, 3: Pictures"
-            [args.distorsion] * string_count,
-            [args.distorsion_orientation] * string_count,
+            [args.distortion] * string_count,
+            [args.distortion_orientation] * string_count,
             [args.handwritten] * string_count,
             [args.name_format] * string_count,
             [args.width] * string_count,
