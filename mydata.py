@@ -13,7 +13,7 @@ category = titles[8]  ### change for each iteration
 folder1 = path1 + category + "/"
 folder2 = path2 + category + "/"
 
-mode = "train3" ###
+mode = "train3" ### hard code
 outimpath = datapath + "out/" + mode + "/temp/"
 
 def jpg2png(): 
