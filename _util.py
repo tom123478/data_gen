@@ -78,6 +78,8 @@ def words_from_novel():
 
 # words_from_novel()              
 
+# test, train 폴더가 test1, test2, test3,.. 등 줌여러 개 있을 경우 test / train 폴더로 통합하면서 
+# PaddleOCR에서 필요한 simpledataset 형식으로 test.txt, train.txt로 만들어줌
 def combine_txt():     
     output_dir = "C:/Data/kor/out/"
     folder = ['test','train']

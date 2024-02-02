@@ -384,7 +384,7 @@ def main():
     print('string_count: '+str(string_count))
     
     # Create the output directory if it does not exist.
-    folder = ['train2','test2']    
+    folder = ['train1','test1']    
     try:
         Path(args.output_dir+'/'+folder[0]).mkdir(exist_ok=True)
         Path(args.output_dir+'/'+folder[1]).mkdir(exist_ok=True)

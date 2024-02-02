@@ -5,12 +5,12 @@ from pathlib import Path
 
 # AiHub 야외실제촬영 이미지 
 datapath = "c:/Data/kor/"
-path1 = datapath + "[라벨]]Training/2.책표지/"  # 라벨
-path2 = datapath + "[원천]Training/2.책표지/"   # 이미지
+path0 = datapath + "Train/Image/2.책표지/"  # 이미지
+path2 = datapath + "Train/Label/2.책표지/"  # 라벨
 
 titles = ["가로형간판","01.총류","02.철학","03.종교","04.사회과학","05.자연과학","06.기술과학","07.예술","08.언어","09.문학","10.역사","11.기타"]
 category = titles[8]  ### change for each iteration
-folder1 = path1 + category + "/"
+folder1 = path0 + category + "/"
 folder2 = path2 + category + "/"
 
 mode = "train3" ### hard code
@@ -18,8 +18,8 @@ outimpath = datapath + "out/" + mode + "/temp/"
 
 def jpg2png(): 
     num = 0
-    print(folder2 + " processing...")
-    for file in Path(folder2).glob('*.jpg'):
+    print(folder1 + " processing...")
+    for file in Path(folder1).glob('*.jpg'):
         im = Image.open(file)
         newfile = file.parent/(file.stem + '.png')
         # print(file)
@@ -31,8 +31,8 @@ def jpg2png():
 
 def png2jpg(): 
     num = 0
-    print(folder2 + " processing...")
-    for file in Path(folder2).glob('*.png'):
+    print(folder1 + " processing...")
+    for file in Path(folder1).glob('*.png'):
         im = Image.open(file)
         newfile = file.parent/(file.stem + '.jpg')
         # print(file)
@@ -48,18 +48,18 @@ def delete_image(num):
         extension = '*.jpg'
     else:
         extension = '*.png'
-    for file in Path(folder2).glob(extension):
+    for file in Path(folder1).glob(extension):
         os.remove(file)
-    print(folder2 + " " + extension, " deleted.")
+    print(folder1 + " " + extension, " deleted.")
 
 
 def check_image_orientation():
-    dir2 = os.listdir(folder2)
+    dir2 = os.listdir(folder1)
     num = 0
-    with open(folder2+"_vertical.txt", 'w', encoding="utf-8") as fo:
+    with open(folder1+"_vertical.txt", 'w', encoding="utf-8") as fo:
                     
         for i, item in enumerate(dir2):
-            imfile = folder2 + item
+            imfile = folder1 + item
             try:
                 im = Image.open(imfile)
             except IOError:
@@ -70,7 +70,7 @@ def check_image_orientation():
                     num += 1
                     print("Orientation not right: ", item, str(width), " x ", str(height))
                     fo.write(item+ "\n")
-                    newfile = folder2 + item
+                    newfile = folder1 + item
                     im2 = im.rotate(90,expand=1)
                     im2.save(newfile)
         print(num, " files were vertically oriented")
@@ -168,13 +168,13 @@ def text_subset():
     try:
         os.makedirs(outimpath)
     except:
-        print("Run text_subset ", folder2)  
-    dir1 = os.listdir(folder1)
+        print("Run text_subset ", folder1)  
+    dir1 = os.listdir(folder2)
     prevtext = ""
     for i, item in enumerate(dir1):
-        imfile = folder2 + os.path.splitext(item)[0] + ".jpg"
+        imfile = folder1 + os.path.splitext(item)[0] + ".jpg"
         if Path(imfile).exists():
-            fname = folder1 + item
+            fname = folder2 + item
             # print(fname)
             texts, boxes, text1 = read_label(fname, prevtext)
             # print(texts)
