@@ -4,19 +4,19 @@ from PIL import Image
 from pathlib import Path
 
 # AiHub 야외실제촬영 이미지 
-datapath = "c:/Data/kor/"
-path0 = datapath + "Train/Image/2.책표지/"  # 이미지
-path2 = datapath + "Train/Label/2.책표지/"  # 라벨
+datapath = "/home/jw/data/aihub/train/"
+path1 = datapath + "image/2.책표지/"  # 이미지
+path2 = datapath + "label/2.책표지/"  # 라벨
 
 titles = ["가로형간판","01.총류","02.철학","03.종교","04.사회과학","05.자연과학","06.기술과학","07.예술","08.언어","09.문학","10.역사","11.기타"]
 category = titles[8]  ### change for each iteration
-folder1 = path0 + category + "/"
+folder1 = path1 + category + "/"
 folder2 = path2 + category + "/"
 
 mode = "train3" ### hard code
 outimpath = datapath + "out/" + mode + "/temp/"
 
-def jpg2png(): 
+def jpg2png(): # save jpg images in folder1 to png format
     num = 0
     print(folder1 + " processing...")
     for file in Path(folder1).glob('*.jpg'):
@@ -29,7 +29,7 @@ def jpg2png():
             print(num)
     print(str(num) + ' files finished')
 
-def png2jpg(): 
+def png2jpg(): # save png images in folder 1 to jpg format
     num = 0
     print(folder1 + " processing...")
     for file in Path(folder1).glob('*.png'):
@@ -43,7 +43,7 @@ def png2jpg():
     print(str(num) + ' files finished')
 
 
-def delete_image(num):
+def delete_image(num): # delete jpg or png files in folder1
     if num == 0:
         extension = '*.jpg'
     else:
@@ -53,7 +53,7 @@ def delete_image(num):
     print(folder1 + " " + extension, " deleted.")
 
 
-def check_image_orientation():
+def check_image_orientation(): # list vertical images in folder 1 and rotate 90 degrees
     dir2 = os.listdir(folder1)
     num = 0
     with open(folder1+"_vertical.txt", 'w', encoding="utf-8") as fo:
@@ -77,7 +77,7 @@ def check_image_orientation():
     fo.close()
 
 
-def read_label(file, prevtext1):
+def read_label(file, prevtext): # read label json file and ignore if the text is same as previous text
     f = open(file, encoding='utf-8')
     data = json.load(f)
     texts = []
@@ -87,7 +87,7 @@ def read_label(file, prevtext1):
         id = item["id"]
         text = item["text"]
         if id == 1:
-            if text == prevtext1:
+            if text == prevtext:
                 return texts, boxes, text
             else:
                 text1 = text
@@ -103,7 +103,7 @@ def read_label(file, prevtext1):
     return texts, boxes, text1
 
 
-def cropimage_writetxt(imfile, outimpath, texts, boxes):
+def cropimage_writetxt(imfile, outimpath, texts, boxes): # save cropped images of texts in outimpath
     filepath = os.path.splitext(imfile)[0]
     path = os.path.split(filepath)[0]
     file = os.path.split(filepath)[1]
@@ -156,15 +156,12 @@ def cropimage_writetxt(imfile, outimpath, texts, boxes):
                         print(file_jpg+ ": " + text)
                 else:
                     im4 = im3.rotate(90,expand=1)
-                    im4.save(outimpath + file_jpg)
-                
-                
+                    im4.save(outimpath + file_jpg)              
                 # print(text+ " " + str((x0,y0, x1,y1)))                
                 # print(imfile)
 
 
-
-def text_subset():
+def text_subset(): # 
     try:
         os.makedirs(outimpath)
     except:

@@ -30,228 +30,181 @@ def parse_arguments():
 
     parser.add_argument(
         "--output_dir",
-        type=str,
-        nargs="?",
+        type=str, nargs="?",
         help="The output directory",
         default="/home/jw/data/ocr/kor3/",
     )    
     parser.add_argument(
-        "-i",
-        "--input_file",
-        type=str,
-        nargs="?",
+        "-i", "--input_file",
+        type=str, nargs="?",
         help="When set, this argument uses a specified text file as source for the text",
         default=""
     )
     parser.add_argument(
-        "-l",
-        "--language",
-        type=str,
-        nargs="?",
+        "-l", "--language",
+        type=str, nargs="?",
         help="The language to use, should be fr (French), en (English), es (Spanish), de (German), or cn (Chinese), or ko (Korean)",
         default="en"
     )
     parser.add_argument(
-        "-nd",
-        "--new_dict",
+        "-nd", "--new_dict",
         action="store_true",
         help="Make new dictionary file in \'dicts\' directory",
         default=False
     )
     parser.add_argument(
-        "-c",
-        "--count",
-        type=int,
-        nargs="?",
+        "-c", "--count",
+        type=int, nargs="?",
         help="The number of images to be created. # of words x # of fonts",
         default=10000
     )
     parser.add_argument(
-        "-rs",
-        "--random_sequences",
+        "-rs", "--random_sequences",
         action="store_true",
         help="Use random sequences as the source text for the generation. Set '-let','-num','-sym' to use letters/numbers/symbols. If none specified, using all three.",
         default=False
     )
     parser.add_argument(
-        "-let",
-        "--include_letters",
+        "-let", "--include_letters",
         action="store_true",
         help="Define if random sequences should contain letters. Only works with -rs",
         default=False
     )
     parser.add_argument(
-        "-num",
-        "--include_numbers",
+        "-num", "--include_numbers",
         action="store_true",
         help="Define if random sequences should contain numbers. Only works with -rs",
         default=False
     )
     parser.add_argument(
-        "-sym",
-        "--include_symbols",
+        "-sym", "--include_symbols",
         action="store_true",
         help="Define if random sequences should contain symbols. Only works with -rs",
         default=False
     )
     parser.add_argument(
-        "-w",
-        "--length",
-        type=int,
-        nargs="?",
+        "-w", "--length",
+        type=int, nargs="?",
         help="Define how many words should be included in each generated sample. If the text source is Wikipedia, this is the MINIMUM length",
         default=1
     )
     parser.add_argument(
-        "-r",
-        "--random",
+        "-r", "--random",
         action="store_true",
         help="Define if the produced string will have variable word count (with --length being the maximum)",
         default=False
     )
     parser.add_argument(
-        "-f",
-        "--format",
-        type=int,
-        nargs="?",
+        "-f", "--format",
+        type=int, nargs="?",
         help="Define the height of the produced images if horizontal, else the width",
         default=96,
     )
     parser.add_argument(
-        "-t",
-        "--thread_count",
-        type=int,
-        nargs="?",
+        "-t", "--thread_count",
+        type=int, nargs="?",
         help="Define the number of thread to use for image generation",
         default=1,
     )
     parser.add_argument(
-        "-e",
-        "--extension",
-        type=str,
-        nargs="?",
+        "-e", "--extension",
+        type=str, nargs="?",
         help="Define the extension to save the image with",
         default="jpg",
     )
     parser.add_argument(
-        "-k",
-        "--skew_angle",
-        type=int,
-        nargs="?",
+        "-k", "--skew_angle",
+        type=int, nargs="?",
         help="Define skewing angle of the generated text. In positive degrees",
         default=1,
     )
     parser.add_argument(
-        "-rk",
-        "--random_skew",
+        "-rk", "--random_skew",
         action="store_true",
         help="When set, the skew angle will be randomized between the value set with -k and it's opposite",
         default=True,
     )
     parser.add_argument(
-        "-bl",
-        "--blur",
-        type=int,
-        nargs="?",
+        "-bl", "--blur",
+        type=int, nargs="?",
         help="Apply gaussian blur to the resulting sample. Should be an integer defining the blur radius",
         default=1,
     )
     parser.add_argument(
-        "-rbl",
-        "--random_blur",
+        "-rbl", "--random_blur",
         action="store_true",
         help="When set, the blur radius will be randomized between 0 and -bl.",
         default=True,
     )
     
     parser.add_argument(
-        "-hw",
-        "--handwritten",
+        "-hw", "--handwritten",
         action="store_true",
         help="Define if the data will be \"handwritten\" by an RNN",
         default=False,
     )
     parser.add_argument(
-        "-na",
-        "--name_format",
+        "-na", "--name_format",
         type=int,
         help="Define how the produced files will be named. 0: [TEXT]_[ID].[EXT], 1: [ID]_[TEXT].[EXT] 2: [ID].[EXT] + one file labels.txt containing id-to-label mappings",
         default=3,
     )
     parser.add_argument(
-        "-d",
-        "--distortion",
-        type=int,
-        nargs="?",
+        "-d", "--distortion",
+        type=int, nargs="?",
         help="Define a distortion applied to the resulting image. 0: None (Default), 1: Sine wave, 2: Cosine wave, 3: Random",
         default=0
     )
     parser.add_argument(
-        "-do",
-        "--distortion_orientation",
-        type=int,
-        nargs="?",
+        "-do", "--distortion_orientation",
+        type=int, nargs="?",
         help="Define the distortion's orientation. Only used if -d is specified. 0: Vertical (Up and down), 1: Horizontal (Left and Right), 2: Both",
         default=2
     )
     parser.add_argument(
-        "-wd",
-        "--width",
-        type=int,
-        nargs="?",
+        "-wd", "--width",
+        type=int, nargs="?",
         help="Define the width of the resulting image. If not set it will be the width of the text + 10. If the width of the generated text is bigger that number will be used",
         default=-1
     )
     parser.add_argument(
-        "-al",
-        "--alignment",
-        type=int,
-        nargs="?",
+        "-al", "--alignment",
+        type=int, nargs="?",
         help="Define the alignment of the text in the image. Only used if the width parameter is set. 0: left, 1: center, 2: right",
         default=1
     )
     parser.add_argument(
-        "-or",
-        "--orientation",
-        type=int,
-        nargs="?",
+        "-or", "--orientation",
+        type=int, nargs="?",
         help="Define the orientation of the text. 0: Horizontal, 1: Vertical",
         default=0
     )   
     parser.add_argument(
-        "-sw",
-        "--space_width",
-        type=float,
-        nargs="?",
+        "-sw", "--space_width",
+        type=float, nargs="?",
         help="Define the width of the spaces between words. 2.0 means twice the normal space width",
         default=1.0
     )
     parser.add_argument(
-        "-m",
-        "--margins",
-        type=margins,
-        nargs="?",
+        "-m", "--margins",
+        type=margins, nargs="?",
         help="Define the margins around the text when rendered. In pixels",
         default=(5, 5, 5, 5)
     )
     parser.add_argument(
-        "-fi",
-        "--fit",
+        "-fi", "--fit",
         action="store_true",
         help="Apply a tight crop around the rendered text",
         default=False
     )
     parser.add_argument(
-        "-ft",
-        "--font",
-        type=str,
-        default = '',
-        nargs="?",
-        help="Define font to be used"
+        "-ft", "--font",
+        type=str, nargs="?",
+        help="Define font to be used",
+        default = ''
     )
     parser.add_argument(
-        "-bb",
-        "--bbox",
+        "-bb", "--bbox",
         action="store_true",
         help="Draw bounding boxes of all letters. Also create a pickle file that \
               stores coordinate and text data.",
@@ -265,28 +218,23 @@ def parse_arguments():
     parser.add_argument(
         "--min_char",
         type=int,
-        default=10,
-        help="Minimum number of character in a line"
+        help="Minimum number of character in a line",
+        default=10
     )
     parser.add_argument(
         "--max_char",
-        type=int,
-        default=40,
+        type=int, default=40,
         help="Maximum number of character in a line"
     )
     parser.add_argument( 
-        "-tc",
-        "--text_color",
-        type=str,
-        nargs="?",
+        "-tc", "--text_color",
+        type=str, nargs="?",
         help="Define the text's color, should be either a single hex color or a range in the ?,? format.",
         default='#282828'
     )
     parser.add_argument(
-        "-b",
-        "--background",
-        type=int,
-        nargs="?",
+        "-b", "--background",
+        type=int, nargs="?",
         help="Define what kind of background to use. 0: Gaussian Noise, 1: Plain white, 2: Quasicrystal, 3: Pictures",
         default=0,
     )
@@ -303,29 +251,23 @@ def make_dict(lang, inp):
             for token in re.sub(r, ' ', line.strip()).split(' '):
                 d.add(token)
 
-    with (Path('/home/jw/data/ocr/kor3/out') / (lang + '_new.txt')).open('w', encoding="utf8", errors='ignore') as f:
+    with (Path('/home/jw/data/ocr/kor3') / (lang + '_new.txt')).open('w', encoding="utf8", errors='ignore') as f:
         for token in d:
             f.write(token+'\n')
 
 def load_fonts(lang):
-    """
-        Load all fonts in the fonts directories
-    """
     return [str(font) for font in (Path('/home/jw/code/ocrdata/fonts') / lang).glob('*')]
 
 def load_dict(lang):
-    """
-        Read the dictionnary file and returns all words in it.
-    """
-    lang_dict = []   ### change the input ko.txt file
-    with (Path('/home/jw/data/ocr/kor3/eng words.txt')).open('r', encoding="utf8", errors='ignore') as d:
+    lang_dict = []   ### change the input ko.txt file  
+    # dict_file = '/home/jw/data/ocr/kor3/symbols.txt' # test1, train1
+    dict_file = '/home/jw/data/ocr/kor3/eng words.txt' # test2, train2
+    # dict_file = '/home/jw/data/ocr/kor3/ko 5000_3.txt' # test3, train3
+    with (Path(dict_file)).open('r', encoding="utf8", errors='ignore') as d:
         lang_dict = [l for l in d.read().splitlines() if len(l) > 0]
     return lang_dict
 
 def main():
-    """
-        Description: Main function
-    """
     # Argument parsing
     args = parse_arguments()
     print(args.output_dir)
@@ -348,9 +290,9 @@ def main():
 
     wc = len(lang_dict)
     fc = len(fonts)
+    args.count = wc * fc
     print('lang_dict: ' , str(wc)) # # of words in ko.txt
     print('fonts: ' , str(fc))     # # of fonts
-    args.count = wc * fc
     print('count:' + str(args.count))
 
     # Set train/test ratio
@@ -365,7 +307,6 @@ def main():
     
     # Creating synthetic sentences (or word)
     strings = []   
-
     if args.input_file != '':
         print("2. using ", args.input_file)
         strings = create_strings_from_file(args.input_file, args.count, args.min_char, args.max_char)
@@ -383,8 +324,8 @@ def main():
     string_count = len(strings)
     print('string_count: '+str(string_count))
     
-    # Create the output directory if it does not exist.
-    folder = ['train1','test1']    
+    ### Create the output directory if it does not exist.
+    folder = ['train2','test2']    
     try:
         Path(args.output_dir+'/'+folder[0]).mkdir(exist_ok=True)
         Path(args.output_dir+'/'+folder[1]).mkdir(exist_ok=True)
@@ -392,48 +333,61 @@ def main():
         if e.errno != errno.EEXIST:
             raise
     
-    ### This is where to hard-code options
-    pre = "bt"
-    for i in range (string_count):  # 각 이미지마다 라벨 텍스트 파일 생성
-        with (Path(args.output_dir+"/"+folder[iFolder[i]]+"/"+pre+"_"+str(i)+".txt")).open('w', encoding="utf8") as f:
-            f.write("{}".format(strings[i]))
+    pre = ['0_bw','1_sw','2_rw','3_wr','4_wb','5_ws','6_by','7_bt','8_bg','9_is','10_it','11_gg',
+           '12_ob','13_oy','14_or','15_odt','16_ows']
+    color = ['#282828','#0781de','#d11204','#FFFFFF','#FFFFFF','#FFFFFF','#282828','#282828','#282828','#ebe7c5','#ebe7c5','#55d97c',
+             '#FFFFFF','#e8e23f','#d11204','#FFFFFF','#FFFFFF']       
+    background = [0,0,0,1,1,1,1,1,1,1,1,1,
+                  0,0,0,1,1]  
+    bgcolor = ['','','','#d11204','#282828','#0781de','#e8e23f','#dbbe8c','#55d97c','#0781de','#dbbe8c','#888888',
+               '','','','#dbbe8c','#0781de']
+    skwidth = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6]
+    skcolor = ['','','','','','','','','','','','','#282828','#282828','#282828','#07337a','#d11204']
+    
+    for k in range(17):
+        ### This is where to hard-code options
+        # k = rnd.randint(0,20)
+        for i in range (string_count):  # 각 이미지마다 라벨 텍스트 파일 생성
+            with (Path(args.output_dir+"/"+folder[iFolder[i]]+"/"+pre[k]+"_"+str(i)+".txt")).open('w', encoding="utf8") as f:
+                f.write("{}".format(strings[i]))
 
-    p = Pool(args.thread_count)     # Fake Text 이미지 파일 저장하기 
-    for _ in tqdm(p.imap(
-        FakeTextDataGenerator.generate_from_tuple,
-        zip(
-            [i for i in range(0, string_count)],
-            strings,
-            [fonts[int(i/wc)] for i in range(0, string_count)], #[fonts[rnd.randrange(0, len(fonts))] for _ in range(0, string_count)],
-            [args.output_dir+"/"+folder[iFolder[i]] for i in range(string_count)],
-            [pre] * string_count,
-            [args.format] * string_count,
-            [args.extension] * string_count,
-            [args.skew_angle] * string_count,
-            [args.random_skew] * string_count,
-            [args.blur] * string_count,
-            [args.random_blur] * string_count,
-            [1] * string_count,   ### background type 0: Gaussian Noise, 1: Plain color, 2: Quasicrystal, 3: Pictures"
-            [args.distortion] * string_count,
-            [args.distortion_orientation] * string_count,
-            [args.handwritten] * string_count,
-            [args.name_format] * string_count,
-            [args.width] * string_count,
-            [args.alignment] * string_count,
-            ['#282828'] * string_count, # text color black 282828 darkblue 07337a yellow e8e23f darkyellow 07337a  ivory ebe7c5 green 55d97c
-            [args.orientation] * string_count,
-            [args.space_width] * string_count,
-            [args.margins] * string_count,
-            [args.fit] * string_count,
-            [args.bbox] * string_count,
-            [args.label_only] * string_count,
-            ['#dbbe8c']* string_count,  # background color : activated when background type is 1 tan dbbe8c red d11204 sky 0781de tan dbbe8c 
-            [0]* string_count,          # stroke width
-            ['#FFFFFF']* string_count   # stroke color
-        )
-    ), total=args.count):
-        pass
-    p.terminate()    
+        p = Pool(args.thread_count)     # Fake Text 이미지 파일 저장하기 
+        
+        for _ in tqdm(p.imap(
+            FakeTextDataGenerator.generate_from_tuple,
+            zip(
+                [i for i in range(0, string_count)],
+                strings,
+                [fonts[int(i/wc)] for i in range(0, string_count)], #[fonts[rnd.randrange(0, len(fonts))] for _ in range(0, string_count)],
+                [args.output_dir+"/"+folder[iFolder[i]] for i in range(string_count)],
+                [pre[k]] * string_count,
+                [args.format] * string_count,
+                [args.extension] * string_count,
+                [args.skew_angle] * string_count,
+                [args.random_skew] * string_count,
+                [args.blur] * string_count,
+                [args.random_blur] * string_count,
+                [background[k]] * string_count,   ### background type 0: Gaussian Noise, 1: Plain color, 2: Quasicrystal, 3: Pictures"
+                [args.distortion] * string_count,
+                [args.distortion_orientation] * string_count,
+                [args.handwritten] * string_count,
+                [args.name_format] * string_count,
+                [args.width] * string_count,
+                [args.alignment] * string_count,
+                [color[k]] * string_count, # text color black 282828 darkblue 07337a yellow e8e23f darkyellow 07337a  ivory ebe7c5 green 55d97c
+                [args.orientation] * string_count,
+                [args.space_width] * string_count,
+                [args.margins] * string_count,
+                [args.fit] * string_count,
+                [args.bbox] * string_count,
+                [args.label_only] * string_count,
+                [bgcolor[k]]* string_count,  # background color : activated when background type is 1 tan dbbe8c red d11204 sky 0781de tan dbbe8c 
+                [skwidth[k]]* string_count,          # stroke width
+                [skcolor[k]]* string_count   # stroke color
+            )
+        ), total=args.count):
+            pass
+        p.terminate()    
 
     # if args.name_format == 2:
     #     # Create file with filename-to-label connections
