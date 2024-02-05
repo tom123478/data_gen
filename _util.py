@@ -81,11 +81,12 @@ def words_from_novel():
 # test, train 폴더가 test1, test2, test3,.. 등 줌여러 개 있을 경우 test / train 폴더로 통합하면서 
 # PaddleOCR에서 필요한 simpledataset 형식으로 test.txt, train.txt로 만들어줌
 def combine_txt():     
-    output_dir = "C:/Data/kor/out/"
+    output_dir = "/home/jw/data/ocr/kor3/"
     folder = ['test','train']
     num_folder = len(folder)
     num_case = 2    ### specify how many cases to include
-    ver = [0, 1]    #   세로 데이터 vertical text 표시해줌. 세로이미지는 -90도 돌려줌 (그런데 이게 필요한가?)
+    ver = [0, 0]    #   세로 데이터 vertical text 표시해줌. 세로이미지는 -90도 돌려줌 (그런데 이게 필요한가?)
+
 
     # Create the directory if it does not exist.
     try:
@@ -98,35 +99,46 @@ def combine_txt():
     for i in range(num_folder):
         with (Path(output_dir+folder[i]+".txt")).open('w', encoding="utf-8") as fo:
             for j in range(0 , num_case):
-                dir = output_dir + folder[i] + str(j+1)
+                dir = output_dir + folder[i] + str(j+1) # test1, test2, ....
                 vert = ver[j]
                 txtfiles = [str(file) for file in (Path(dir)).glob('*.txt')]
                 num_file = len(txtfiles)
                 print(dir + ": " + str(num_file))
 
+                if(j==0):
+                    index = num_file*[1]
+                else:
+                    num_get = int(num_file/2)
+                    num_not = num_file - num_get
+                    index = num_not*[0] + num_get*[1]
+                    rnd.shuffle(index)  
+
+
                 for k in range(num_file):
-                    txtfile = txtfiles[k]
-                    name = Path(txtfile).stem
-                    jpgfile = Path(dir + '/' + name + '.jpg')
-                    jpgfile2 = Path(output_dir + folder[i] + '/' + name + '.jpg')
-                    if jpgfile.is_file():
-                        try:
-                            im = Image.open(jpgfile)
-                            width, height = im.size
+                    if(index[k] == 1):
+                        txtfile = txtfiles[k]
+                        name = Path(txtfile).stem
+                        jpgfile = Path(dir + '/' + name + '.jpg')
+                        jpgfile2 = Path(output_dir + folder[i] + '/' + name + '.jpg')
+                        if jpgfile.is_file():
+                            try:
+                                im = Image.open(jpgfile)
+                                width, height = im.size
 
-                            if vert == 1:                                
-                                im2 = im.rotate(90, expand=1)
-                                im2.save(jpgfile2)
-                            else:
-                                im.save(jpgfile2)
+                                if vert == 1:                                
+                                    im2 = im.rotate(90, expand=1)
+                                    im2.save(jpgfile2)
+                                else:
+                                    im.save(jpgfile2)
 
-                            with (Path(txtfile)).open('r', encoding="utf-8") as fin:
-                                line = fin.readline().strip('\n')
-                                fo.write("{}/{}.jpg\t{}\n".format(folder[i],name,line))
-                                # print(folder[i] + '/' +  name + '.jpg' + '\t' + line)
-                            fin.close()
-                        except IOError:
-                            print("IO Error", jpgfile)                   
+                                with (Path(txtfile)).open('r', encoding="utf-8") as fin:
+                                    line = fin.readline().strip('\n')
+                                    fo.write("{}/{}.jpg\t{}\n".format(folder[i],name,line))
+                                    # print(folder[i] + '/' +  name + '.jpg' + '\t' + line)
+                                fin.close()
+
+                            except IOError:
+                                print("IO Error", jpgfile)                   
         fo.close()
 
 # combine_txt()
