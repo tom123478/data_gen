@@ -4,6 +4,14 @@ import errno
 from PIL import Image
 import os
 
+def openimage():
+    imfile = '/home/jw/data/ocr/kor3/train2/15_odt_1101.jpg'
+    im = Image.open(imfile)
+    im.show()
+
+# openimage()
+
+
 def resize600(inputfolder, outfolder): # resize to 600 pixel
     try:
         os.makedirs(outfolder)
@@ -35,48 +43,135 @@ def resize600(inputfolder, outfolder): # resize to 600 pixel
                 
 def words_from_dicts():
     dict = []
-    with (Path('C:/Data/kor/kor3/korean_dict_symbol.txt')).open('r', encoding="utf-8", errors='ignore') as d:
+    with (Path('/home/jw/data/ocr/kor3/korean only.txt')).open('r', encoding="utf-8", errors='ignore') as d:
         dict = [l for l in d.read().splitlines() if len(l) > 0]
     n_dict = len(dict)    
     print(n_dict)
 
-    with (Path('C:/Data/kor/kor3/num_symbol.txt')).open('w', encoding="utf-8") as f:
+    with (Path('/home/jw/data/ocr/kor3//kor word.txt')).open('w', encoding="utf-8") as f:
         
         rnd.shuffle(dict)
-        for length in range(2,16) :
-            lines = int(n_dict/length)
-            remain = n_dict%length
-            print(str(length)+'x'+ str(lines) +' + '+ str(remain))        
+        numwords = 0
+        for wlen in range(14,15) :
+            lines = int(n_dict/wlen)
+            remain = n_dict%wlen
+            numwords += lines+1
+            print(str(wlen)+'x'+ str(lines) +' + '+ str(remain))        
             for i in range(lines):
-                if length < 100:  
-                    for j in range(length):
-                        f.write("{}".format(dict[i*length+j]))
-                    f.write("\n")
-                elif length < 200: #
-                    for j in range(4):
-                        f.write("{}".format(dict[i*length+j]))                   
-                    for j in range(4,length):
-                        f.write("{}".format(dict[i*length+j]))
-                    f.write("\n")
-                else:           # 
-                    for j in range(6):
-                        f.write("{}".format(dict[i*length+j]))
-                    f.write(" ")
-                    for j in range(6,length):
-                        f.write("{}".format(dict[i*length+j]))
-                    f.write("\n")
+                for j in range(wlen):
+                    f.write("{}".format(dict[i*wlen+j]))
+                f.write("\n")
+                
+                # if wlen < 100:  
+                #     for j in range(wlen):
+                #         f.write("{}".format(dict[i*wlen+j]))
+                #     f.write("\n")
+                # elif wlen < 200: #
+                #     for j in range(4):
+                #         f.write("{}".format(dict[i*wlen+j]))                   
+                #     for j in range(4,wlen):
+                #         f.write("{}".format(dict[i*wlen+j]))
+                #     f.write("\n")
+                # else:           # 
+                #     for j in range(6):
+                #         f.write("{}".format(dict[i*wlen+j]))
+                #     f.write(" ")
+                #     for j in range(6,wlen):
+                #         f.write("{}".format(dict[i*wlen+j]))
+                #     f.write("\n")
 
-            # for j in range(remain):
-            #     f.write("{}".format(dict[lines*length+j]))
-            # f.write("\n")
+            for j in range(remain):
+                f.write("{}".format(dict[lines*wlen+j]))
+            f.write("\n")
+    f.close()
+    print(numwords)
+
+words_from_dicts()
+                
+def phrases_from_novel():
+    txt_file = '/home/jw/code/ocrdata/texts/test.txt'
+    max = 20
+    with open(txt_file, 'r', encoding='utf-8') as f:
+        lines = [' '.join(l.strip().split()) for l in f]
+        lines = [l[:] for l in lines if len(l) > 0]
+        text = []
+        for l in lines:
+            llen = len(l)
+            if llen < max:
+                text.append(l)
+            else:
+                words = l.split()
+                num = len(words[0])
+                temp = words[0]
+                nwords = len(words)
+
+                for i in range(1, nwords): 
+                    num = num + 1 + len(words[i])                                       
+                    if num < max:
+                        temp = temp + ' ' + words[i]                                             
+                    else:                        
+                        text.append(temp[:max])
+                        temp = words[i]
+                        num = len(words[i])
+                text.append(temp[:max])
+        print(text)
+        f.close()
+
+# phrases_from_novel()   
+
+def words_from_novel():
+    txt_files = [
+                # '/home/jw/code/ocrdata/texts/alice.txt',
+                #  '/home/jw/code/ocrdata/texts/button.txt',
+                #  '/home/jw/code/ocrdata/texts/carol.txt',
+                #  '/home/jw/code/ocrdata/texts/charles.txt',
+                 '/home/jw/code/ocrdata/texts/esop.txt'
+                #  '/home/jw/code/ocrdata/texts/gatsby.txt',
+                #  '/home/jw/code/ocrdata/texts/great.txt',
+                #  '/home/jw/code/ocrdata/texts/grimm.txt',
+                #  '/home/jw/code/ocrdata/texts/kapka.txt',
+                #  '/home/jw/code/ocrdata/texts/long.txt',
+                #  '/home/jw/code/ocrdata/texts/prince.txt'
+    ]
+    max = 25
+    words = []
+    for txt_file in txt_files:
+        with open(txt_file, 'r', encoding='utf-8') as f:
+            lines = [' '.join(l.strip().split()) for l in f]
+            lines = [l[:] for l in lines if len(l) > 0]            
+            for l in lines:
+                line = l.split()
+                for w in line:
+                    if len(w) < max:
+                        words.append(w)
+            
+        f.close()
+
+    words.sort()
+    word2 = list(dict.fromkeys(words))
+    print(word2)
+    print(len(word2))
+    with open('/home/jw/data/ocr/kor3/kor nov0.txt', 'w', encoding='utf-8') as fo:
+        for w in word2:
+            fo.write(w +"\n")                
+    fo.close()
+
+# words_from_novel()
+
+def delete_dup():
+    with open('/home/jw/data/ocr/kor3/kor nov0.txt', 'r', encoding='utf-8') as f:
+        words = [l for l in f]
     f.close()
 
-# words_from_dicts()
-                
-def words_from_novel():
-    file = ''
-
-# words_from_novel()              
+    words.sort()
+    word2 = list(dict.fromkeys(words))    
+    print(len(words))
+    print(len(word2))
+    with open('/home/jw/data/ocr/kor3/kor novel.txt', 'w', encoding='utf-8') as fo:
+        for w in word2:
+            fo.write(w)                
+    fo.close()
+# delete_dup()
 
 # test, train 폴더가 test1, test2, test3,.. 등 줌여러 개 있을 경우 test / train 폴더로 통합하면서 
 # PaddleOCR에서 필요한 simpledataset 형식으로 test.txt, train.txt로 만들어줌

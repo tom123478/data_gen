@@ -44,7 +44,7 @@ def parse_arguments():
         "-l", "--language",
         type=str, nargs="?",
         help="The language to use, should be fr (French), en (English), es (Spanish), de (German), or cn (Chinese), or ko (Korean)",
-        default="en"
+        default="ko"
     )
     parser.add_argument(
         "-nd", "--new_dict",
@@ -261,8 +261,8 @@ def load_fonts(lang):
 def load_dict(lang):
     lang_dict = []   ### change the input ko.txt file  
     # dict_file = '/home/jw/data/ocr/kor3/symbols.txt' # test1, train1
-    dict_file = '/home/jw/data/ocr/kor3/eng words.txt' # test2, train2
-    # dict_file = '/home/jw/data/ocr/kor3/ko 5000_3.txt' # test3, train3
+    # dict_file = '/home/jw/data/ocr/kor3/eng input.txt' # test2, train2
+    dict_file = '/home/jw/data/ocr/kor3/kor input.txt' # test3, train3
     with (Path(dict_file)).open('r', encoding="utf8", errors='ignore') as d:
         lang_dict = [l for l in d.read().splitlines() if len(l) > 0]
     return lang_dict
@@ -298,8 +298,8 @@ def main():
     # Set train/test ratio
     num_test = int(args.count/10)
     num_train = args.count - num_test
-    iFolder = num_train*[0] + num_test*[1]
-    # iFolder = args.count*[0]
+    # iFolder = num_train*[0] + num_test*[1]
+    iFolder = args.count*[0]
     rnd.shuffle(iFolder)    
 
     # for i in range (fc):
@@ -325,14 +325,16 @@ def main():
     print('string_count: '+str(string_count))
     
     ### Create the output directory if it does not exist.
-    folder = ['train2','test2']    
+    folder = ['train3','test3']    
     try:
         Path(args.output_dir+'/'+folder[0]).mkdir(exist_ok=True)
         Path(args.output_dir+'/'+folder[1]).mkdir(exist_ok=True)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise
-    
+
+    ### This is where to hard-code options
+    num_styles = 17
     pre = ['0_bw','1_sw','2_rw','3_wr','4_wb','5_ws','6_by','7_bt','8_bg','9_is','10_it','11_gg',
            '12_ob','13_oy','14_or','15_odt','16_ows']
     color = ['#282828','#0781de','#d11204','#FFFFFF','#FFFFFF','#FFFFFF','#282828','#282828','#282828','#ebe7c5','#ebe7c5','#55d97c',
@@ -344,8 +346,8 @@ def main():
     skwidth = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6]
     skcolor = ['','','','','','','','','','','','','#282828','#282828','#282828','#07337a','#d11204']
     
-    for k in range(17):
-        ### This is where to hard-code options
+    for k in range(num_styles):
+        
         # k = rnd.randint(0,20)
         for i in range (string_count):  # 각 이미지마다 라벨 텍스트 파일 생성
             with (Path(args.output_dir+"/"+folder[iFolder[i]]+"/"+pre[k]+"_"+str(i)+".txt")).open('w', encoding="utf8") as f:
