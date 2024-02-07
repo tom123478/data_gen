@@ -72,7 +72,7 @@ def words_from_dicts():
                 #     for j in range(4,wlen):
                 #         f.write("{}".format(dict[i*wlen+j]))
                 #     f.write("\n")
-                # else:           # 
+                # else:           # 중간 띄어쓰기 도입
                 #     for j in range(6):
                 #         f.write("{}".format(dict[i*wlen+j]))
                 #     f.write(" ")
@@ -86,9 +86,9 @@ def words_from_dicts():
     f.close()
     print(numwords)
 
-words_from_dicts()
+# words_from_dicts()
                 
-def phrases_from_novel():
+def phrases_from_novel(): # get phrases within a fixed length
     txt_file = '/home/jw/code/ocrdata/texts/test.txt'
     max = 20
     with open(txt_file, 'r', encoding='utf-8') as f:
@@ -119,19 +119,24 @@ def phrases_from_novel():
 
 # phrases_from_novel()   
 
-def words_from_novel():
+def words_from_novel(): # get unique words lists from novels
+
+    with open('/home/jw/data/ocr/kor3/korean_dict_3.txt', 'r', encoding='utf-8') as f:
+        kordict = [' '.join(l.strip().split()) for l in f]
+    f.close()
+
     txt_files = [
-                # '/home/jw/code/ocrdata/texts/alice.txt',
-                #  '/home/jw/code/ocrdata/texts/button.txt',
-                #  '/home/jw/code/ocrdata/texts/carol.txt',
-                #  '/home/jw/code/ocrdata/texts/charles.txt',
-                 '/home/jw/code/ocrdata/texts/esop.txt'
-                #  '/home/jw/code/ocrdata/texts/gatsby.txt',
-                #  '/home/jw/code/ocrdata/texts/great.txt',
-                #  '/home/jw/code/ocrdata/texts/grimm.txt',
-                #  '/home/jw/code/ocrdata/texts/kapka.txt',
-                #  '/home/jw/code/ocrdata/texts/long.txt',
-                #  '/home/jw/code/ocrdata/texts/prince.txt'
+                '/home/jw/code/ocrdata/texts/alice.txt',
+                 '/home/jw/code/ocrdata/texts/button.txt',
+                 '/home/jw/code/ocrdata/texts/carol.txt',
+                 '/home/jw/code/ocrdata/texts/charles.txt',
+                 '/home/jw/code/ocrdata/texts/esop.txt',
+                 '/home/jw/code/ocrdata/texts/gatsby.txt',
+                 '/home/jw/code/ocrdata/texts/great.txt',
+                 '/home/jw/code/ocrdata/texts/grimm.txt',
+                 '/home/jw/code/ocrdata/texts/kapka.txt',
+                 '/home/jw/code/ocrdata/texts/long.txt',
+                 '/home/jw/code/ocrdata/texts/prince.txt'
     ]
     max = 25
     words = []
@@ -142,8 +147,13 @@ def words_from_novel():
             for l in lines:
                 line = l.split()
                 for w in line:
-                    if len(w) < max:
-                        words.append(w)
+                    nw = len(w)
+                    w2 = ''
+                    for i in range(nw):
+                        if w[i] in kordict:
+                            w2 = w2 + w[i]
+                    if len(w2) < max and len(w2) >1:
+                        words.append(w2)
             
         f.close()
 
@@ -151,12 +161,12 @@ def words_from_novel():
     word2 = list(dict.fromkeys(words))
     print(word2)
     print(len(word2))
-    with open('/home/jw/data/ocr/kor3/kor nov0.txt', 'w', encoding='utf-8') as fo:
+    with open('/home/jw/data/ocr/kor3/kor nov11.txt', 'w', encoding='utf-8') as fo:
         for w in word2:
             fo.write(w +"\n")                
     fo.close()
 
-# words_from_novel()
+words_from_novel()
 
 def delete_dup():
     with open('/home/jw/data/ocr/kor3/kor nov0.txt', 'r', encoding='utf-8') as f:
@@ -237,6 +247,28 @@ def combine_txt():
         fo.close()
 
 # combine_txt()
+        
+def test():
+    with open('/home/jw/data/ocr/kor3/korean_dict_3.txt', 'r', encoding='utf-8') as f:
+        kordict = [' '.join(l.strip().split()) for l in f]
+        # print(dict)
+    f.close()
+    words = []
+    with open('/home/jw/data/ocr/kor3/test_sym', 'r', encoding='utf-8') as f:
+        lines = [' '.join(l.strip().split()) for l in f]
+        lines = [l[:] for l in lines if len(l) > 0] 
+        for l in lines:
+            nl = len(l)
+            w2 = ''
+            for i in range(nl):
+                if l[i] in kordict:
+                    w2 = w2 + l[i]
+            print(w2)
+            if len(w2) < max and len(w2) >1:
+                words.append(w2)
+    f.close()
+
+# test()
 
 
 
