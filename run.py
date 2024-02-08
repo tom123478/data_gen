@@ -44,7 +44,7 @@ def parse_arguments():
         "-l", "--language",
         type=str, nargs="?",
         help="The language to use, should be fr (French), en (English), es (Spanish), de (German), or cn (Chinese), or ko (Korean)",
-        default="ko" ###
+        default="en" ###
     )
     parser.add_argument(
         "-nd", "--new_dict",
@@ -261,8 +261,8 @@ def load_fonts(lang):
 def load_dict(lang):
     lang_dict = []   ### change the input ko.txt file  
     # dict_file = '/home/jw/data/ocr/kor3/symbols.txt' # test1, train1
-    # dict_file = '/home/jw/data/ocr/kor3/eng input.txt' # test2, train2
-    dict_file = '/home/jw/data/ocr/kor3/kor nov11.txt' # test3, train3
+    dict_file = '/home/jw/data/ocr/kor3/eng input.txt' # test2, train2
+    # dict_file = '/home/jw/data/ocr/kor3/kor nov11.txt' # test3, train3
     with (Path(dict_file)).open('r', encoding="utf8", errors='ignore') as d:
         lang_dict = [l for l in d.read().splitlines() if len(l) > 0]
     return lang_dict
@@ -325,7 +325,7 @@ def main():
     print('string_count: '+str(string_count))
     
     ### Create the output directory if it does not exist.
-    folder = ['train3','test3']    
+    folder = ['train2','test2']    
     try:
         Path(args.output_dir+'/'+folder[0]).mkdir(exist_ok=True)
         Path(args.output_dir+'/'+folder[1]).mkdir(exist_ok=True)
