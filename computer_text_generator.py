@@ -2,25 +2,25 @@ import random as rnd
 import numpy as np
 from PIL import Image, ImageColor, ImageFont, ImageDraw, ImageFilter
 
-def generate(text, font, text_color, font_size, orientation, space_width, fit, strokewidth, strokefill):
+def generate(text, font, text_color, font_size, orientation, space_width, fit, strokewidth, strokefill, cursive):
     if orientation == 0:
         # only horizontal_text supports bounding box
         if strokewidth > 0:
             return _generate_horizontal_text_stroke(text, font, text_color, font_size, space_width, fit, strokewidth, strokefill)
         else:
-            return _generate_horizontal_text(text, font, text_color, font_size, space_width, fit)
+            return _generate_horizontal_text(text, font, text_color, font_size, space_width, fit, cursive)
     elif orientation == 1:
         return _generate_vertical_text(text, font, text_color, font_size, space_width, fit)
     else:
         raise ValueError("Unknown orientation " + str(orientation))
 
-def _generate_horizontal_text(text, font, text_color, font_size, space_width, fit):
+def _generate_horizontal_text(text, font, text_color, font_size, space_width, fit, cursive):
     image_font = ImageFont.truetype(font=font, size=font_size)
     words = text.split(' ')
     space_width = image_font.getsize(' ')[0] * space_width 
 
     words_width = [image_font.getsize(w)[0] for w in words]
-    text_width =  sum(words_width) + int(space_width) * (len(words) - 1)
+    text_width =  sum(words_width) + int(space_width) * (len(words) - 1) + cursive
     text_height = max([image_font.getsize(w)[1] for w in words])
     
     char_bbox = []
@@ -51,7 +51,7 @@ def _generate_horizontal_text(text, font, text_color, font_size, space_width, fi
     )
 
     for i, w in enumerate(words):
-        txt_draw.text((sum(words_width[0:i]) + i * int(space_width), 0), w, fill=fill, font=image_font)
+        txt_draw.text((cursive + sum(words_width[0:i]) + i * int(space_width), 0), w, fill=fill, font=image_font)
         
     if fit:
         return txt_img.crop(txt_img.getbbox()), char_bbox

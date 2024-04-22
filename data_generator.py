@@ -51,7 +51,7 @@ class FakeTextDataGenerator(object):
         cls.generate(*t)
 
     @classmethod
-    def generate(cls, index, text, font, out_dir, pre, size, extension, skewing_angle, random_skew, blur, random_blur, background_type, distortion_type, distortion_orientation, is_handwritten, name_format, width, alignment, text_color, orientation, space_width, margins, fit, is_bbox, label_only, bgcolor, strokewidth, strokefill):
+    def generate(cls, index, text, font, out_dir, cursive, size, extension, skewing_angle, random_skew, blur, random_blur, background_type, distortion_type, distortion_orientation, is_handwritten, name_format, width, alignment, text_color, orientation, space_width, margins, fit, is_bbox, label_only, bgcolor, strokewidth, strokefill):
         image = None
 
         margin_top, margin_left, margin_bottom, margin_right = margins
@@ -67,9 +67,9 @@ class FakeTextDataGenerator(object):
         #     image = handwritten_text_generator.generate(text, text_color, fit)
         # else:
         if orientation == 0:  
-            image, bboxes = computer_text_generator.generate(text, font, text_color, size, orientation, space_width, fit, strokewidth, strokefill)
+            image, bboxes = computer_text_generator.generate(text, font, text_color, size, orientation, space_width, fit, strokewidth, strokefill, cursive)
         else:
-            image, bboxes = computer_text_generator.generate(text, font, text_color, size, orientation, space_width, fit, strokewidth, strokefill)
+            image, bboxes = computer_text_generator.generate(text, font, text_color, size, orientation, space_width, fit, strokewidth, strokefill, cursive)
 
         random_angle = rnd.randint(0-skewing_angle, skewing_angle)
 
@@ -171,7 +171,7 @@ class FakeTextDataGenerator(object):
             image_name = '{}.{}'.format(str(index),extension)
         else: ### image file name 
             # print('{} is not a valid name format. Using default.'.format(name_format))
-            image_name = '{}_{}.{}'.format(pre, str(index), extension)
+            image_name = '{}.{}'.format(str(index).zfill(6), extension)
 
         # Save the image
         final_image = final_image.convert('RGB')

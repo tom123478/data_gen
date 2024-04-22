@@ -32,25 +32,13 @@ def parse_arguments():
         "--output_dir",
         type=str, nargs="?",
         help="The output directory",
-        default="/home/jw/data/ocr/kor3/",
+        default="/home/jw/data/ocrdata/en/",
     )    
     parser.add_argument(
         "-i", "--input_file",
         type=str, nargs="?",
         help="When set, this argument uses a specified text file as source for the text",
         default=""
-    )
-    parser.add_argument(
-        "-l", "--language",
-        type=str, nargs="?",
-        help="The language to use, should be fr (French), en (English), es (Spanish), de (German), or cn (Chinese), or ko (Korean)",
-        default="en" ###
-    )
-    parser.add_argument(
-        "-nd", "--new_dict",
-        action="store_true",
-        help="Make new dictionary file in \'dicts\' directory",
-        default=False
     )
     parser.add_argument(
         "-c", "--count",
@@ -98,7 +86,7 @@ def parse_arguments():
         "-f", "--format",
         type=int, nargs="?",
         help="Define the height of the produced images if horizontal, else the width",
-        default=96,
+        default=64,
     )
     parser.add_argument(
         "-t", "--thread_count",
@@ -135,8 +123,7 @@ def parse_arguments():
         action="store_true",
         help="When set, the blur radius will be randomized between 0 and -bl.",
         default=True,
-    )
-    
+    )    
     parser.add_argument(
         "-hw", "--handwritten",
         action="store_true",
@@ -153,13 +140,13 @@ def parse_arguments():
         "-d", "--distortion",
         type=int, nargs="?",
         help="Define a distortion applied to the resulting image. 0: None (Default), 1: Sine wave, 2: Cosine wave, 3: Random",
-        default=0
+        default=1  #select 1 or 2, never 3
     )
     parser.add_argument(
         "-do", "--distortion_orientation",
         type=int, nargs="?",
         help="Define the distortion's orientation. Only used if -d is specified. 0: Vertical (Up and down), 1: Horizontal (Left and Right), 2: Both",
-        default=2
+        default=0 
     )
     parser.add_argument(
         "-wd", "--width",
@@ -195,7 +182,7 @@ def parse_arguments():
         "-fi", "--fit",
         action="store_true",
         help="Apply a tight crop around the rendered text",
-        default=False
+        default=True
     )
     parser.add_argument(
         "-ft", "--font",
@@ -238,46 +225,71 @@ def parse_arguments():
         help="Define what kind of background to use. 0: Gaussian Noise, 1: Plain white, 2: Quasicrystal, 3: Pictures",
         default=0,
     )
+    parser.add_argument(
+        "-l", "--language",
+        type=str, nargs="?",
+        help="The language to use, should be fr (French), en (English), es (Spanish), de (German), or cn (Chinese), or ko (Korean)",
+        default="ko" ###
+    )
     return parser.parse_args()
 
-def make_dict(lang, inp):
-    """
-        Read input file and make dictionnary file
-    """
-    d = set()
-    r = re.compile(' +')
-    with open(inp, 'r', encoding="utf8") as f:
-        for line in f:
-            for token in re.sub(r, ' ', line.strip()).split(' '):
-                d.add(token)
+def read_colorcomb(file_i):
+    with open(file_i, 'r', encoding='utf-8') as f:
+        lines = [' '.join(l.strip().split()) for l in f]        
+    f.close()
+    
+    num_comb = len(lines)
+    color_font = []
+    color_back = []
+    # for i in range(num_comb):
+    #     print(lines[i])
+    for l in lines:
+        line = l.split()
+        color_font.append(line[0])
+        color_back.append(line[1])
 
-    with (Path('/home/jw/data/ocr/kor3') / (lang + '_new.txt')).open('w', encoding="utf8", errors='ignore') as f:
-        for token in d:
-            f.write(token+'\n')
+    return color_font, color_back
 
 def load_fonts(lang):
-    return [str(font) for font in (Path('/home/jw/code/ocrdata/fonts') / lang).glob('*')]
+    fontlist = [str(font) for font in (Path('/home/jw/code/ocrdata/fonts') / lang).glob('*')]
+    n = 0
+    for item in fontlist:
+        print(str(n)+ " " + item)
+        n += 1
+    return fontlist
 
-def load_dict(lang):
-    lang_dict = []   ### change the input ko.txt file  
-    # dict_file = '/home/jw/data/ocr/kor3/symbols.txt' # test1, train1
-    dict_file = '/home/jw/data/ocr/kor3/eng input.txt' # test2, train2
-    # dict_file = '/home/jw/data/ocr/kor3/kor nov11.txt' # test3, train3
+def load_dict(): ### change the input ko.txt file 
+    lang_dict = []    
+    # dict_file = '/home/jw/data/ocrdata/words en all.txt' # train0, val0
+    dict_file = '/home/jw/data/ocrdata/words ko all.txt' # train2, val2
+    # dict_file = '/home/jw/data/ocrdata/words test.txt'
+   
     with (Path(dict_file)).open('r', encoding="utf8", errors='ignore') as d:
         lang_dict = [l for l in d.read().splitlines() if len(l) > 0]
+
+    # with (Path('/home/jw/data/easyocr/words en_.txt')).open('w', encoding="utf8") as fo:
+    #     for l in lang_dict:
+    #         if len(l)>25:
+    #             fo.write("{}\n".format(l[:25]))
+    #         else:
+    #             fo.write("{}\n".format(l))
+    # fo.close()
     return lang_dict
 
 def main():
-    # Argument parsing
-    args = parse_arguments()
-    print(args.output_dir)
-
-    # print(args.new_dict)
-    if args.new_dict:
-        make_dict(args.language, args.input_file)
+    args = parse_arguments()      # Argument parsing
+        
+    ### Create the output directory if it does not exist.
+    outfolder = ['train2','val2']    
+    try:
+        Path(args.output_dir+'/'+outfolder[0]).mkdir(exist_ok=True)
+        Path(args.output_dir+'/'+outfolder[1]).mkdir(exist_ok=True)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
     # Creating word list
-    lang_dict = load_dict(args.language)
+    lang_dict = load_dict()
 
     # Create font (path) list
     if not args.font:
@@ -288,12 +300,21 @@ def main():
         else:
             sys.exit("Cannot open font")
 
+    num_digit = 6
+    num_maxfile = 10000
     wc = len(lang_dict)
     fc = len(fonts)
     args.count = wc * fc
+    print(args.output_dir)
     print('lang_dict: ' , str(wc)) # # of words in ko.txt
     print('fonts: ' , str(fc))     # # of fonts
     print('count:' + str(args.count))
+
+    nfolders = int(args.count/num_maxfile)
+    for i in range(nfolders+1):
+        # print(args.output_dir+"/"+outfolder[0]+"/"+str(i))
+        Path(args.output_dir+'/'+outfolder[0]+'/'+str(i)).mkdir(exist_ok=True)
+        Path(args.output_dir+'/'+outfolder[1]+'/'+str(i)).mkdir(exist_ok=True)   
 
     # Set train/test ratio
     num_test = int(args.count/10)
@@ -302,8 +323,6 @@ def main():
     iFolder = num_train*[0] + num_test*[1]
     rnd.shuffle(iFolder)    
 
-    # for i in range (fc):
-    #     print(fonts[i])
     
     # Creating synthetic sentences (or word)
     strings = []   
@@ -318,42 +337,56 @@ def main():
         if args.include_symbols or True not in (args.include_letters, args.include_numbers, args.include_symbols):
             args.name_format = 2
     else:
-        print("4. use strings from dict")
+        print("4. use strings from dict") # We're using this
         strings = create_strings_from_dict(args.length, args.random, args.count, lang_dict)
 
     string_count = len(strings)
     print('string_count: '+str(string_count))
-    
-    ### Create the output directory if it does not exist.
-    folder = ['train2','test2']    
-    try:
-        Path(args.output_dir+'/'+folder[0]).mkdir(exist_ok=True)
-        Path(args.output_dir+'/'+folder[1]).mkdir(exist_ok=True)
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise
-  
-    num_styles = 17
-    pre = ['0_bw','1_sw','2_rw','3_wr','4_wb','5_ws','6_by','7_bt','8_bg','9_is','10_it','11_gg',
-           '12_ob','13_oy','14_or','15_odt','16_ows']
-    color = ['#282828','#0781de','#d11204','#FFFFFF','#FFFFFF','#FFFFFF','#282828','#282828','#282828','#ebe7c5','#ebe7c5','#55d97c',
-             '#FFFFFF','#e8e23f','#d11204','#FFFFFF','#FFFFFF']       
-    background = [0,0,0,1,1,1,1,1,1,1,1,1,
-                  0,0,0,1,1]  
-    bgcolor = ['','','','#d11204','#282828','#0781de','#e8e23f','#dbbe8c','#55d97c','#0781de','#dbbe8c','#888888',
-               '','','','#dbbe8c','#0781de']
-    skwidth = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6]
-    skcolor = ['','','','','','','','','','','','','#282828','#282828','#282828','#07337a','#d11204']
-
-    for j in range(4):        
-        if j == 0:
-            k = 0
+    # print(strings)
+    skew = []
+    distort = []
+    for l in strings:
+        slen = len(l)
+        if slen < 5:
+            skew.append(7)
+            distort.append(1)
+        elif slen < 10:
+            skew.append(3)
+            distort.append(1)
         else:
-            k = rnd.randint(1,16)
+            skew.append(0)
+            distort.append(0)
+  
+    cursive = [0]*string_count
+    for i in range(5*wc, 7*wc):
+        cursive[i] = 15
+  
+    # number of styles = 1152
+    color, bgcolor = read_colorcomb("/home/jw/data/ocrdata/color_gray.txt")
+    num_color = len(color)
+    back = [1]*num_color
+    back[0] = 0 
+    back[1] = 0
 
-        for i in range (string_count):  # 각 이미지마다 라벨 텍스트 파일 생성
-            with (Path(args.output_dir+"/"+folder[iFolder[i]]+"/"+pre[k]+"_"+str(i)+".txt")).open('w', encoding="utf8") as f:
-                f.write("{}".format(strings[i]))
+    # skwidth = [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 6, 6, 6, 6]
+    # skcolor = ['','','','','','','','','','','','','#282828','#282828','#282828','#07337a','#d11204']
+    styles = string_count*[0]
+ 
+    # First cycle produces standard b/w image, other cycles produce random style images. 
+    for cycle in range(1):  
+        # for i in range (string_count): 
+        #     styles[i] = cycle
+
+        # if cycle > 0: # 랜덤으로 스타일 적용하고 싶을 때
+        #     for i in range (string_count): 
+        #         styles[i] = rnd.randint(1,16)
+        with (Path(args.output_dir+"/"+outfolder[0]+".txt")).open('w', encoding="utf8") as f0:
+            with (Path(args.output_dir+"/"+outfolder[1]+".txt")).open('w', encoding="utf8") as f1:
+                for i in range (string_count):  # 라벨 텍스트 파일 생성
+                    if iFolder[i] == 0:
+                        f0.write("{}/{}/{}.jpg\t{}\n".format(outfolder[0],int(i/num_maxfile),str(i).zfill(num_digit),strings[i]))
+                    else:
+                        f1.write("{}/{}/{}.jpg\t{}\n".format(outfolder[1],int(i/num_maxfile),str(i).zfill(num_digit),strings[i]))
 
         p = Pool(args.thread_count)     # Fake Text 이미지 파일 저장하기 
         
@@ -363,65 +396,36 @@ def main():
                 [i for i in range(0, string_count)],
                 strings,
                 [fonts[int(i/wc)] for i in range(0, string_count)], #[fonts[rnd.randrange(0, len(fonts))] for _ in range(0, string_count)],
-                [args.output_dir+"/"+folder[iFolder[i]] for i in range(string_count)],
-                [pre[k]] * string_count,
+                [args.output_dir+"/"+outfolder[iFolder[i]]+"/"+str(int(i/num_maxfile)) for i in range(string_count)],
+                [cursive[i] for i in range(string_count)],
                 [args.format] * string_count,
                 [args.extension] * string_count,
-                [args.skew_angle] * string_count,
+                [skew[i] for i in range(string_count)] ,
                 [args.random_skew] * string_count,
                 [args.blur] * string_count,
                 [args.random_blur] * string_count,
-                [background[k]] * string_count,   # background type 0: Gaussian Noise, 1: Plain color, 2: Quasicrystal, 3: Pictures"
+                [back[i%num_color] for i in range(0, string_count)],   # background type 0: Gaussian Noise, 1: Plain color, 2: Quasicrystal, 3: Pictures"
                 [args.distortion] * string_count,
                 [args.distortion_orientation] * string_count,
                 [args.handwritten] * string_count,
                 [args.name_format] * string_count,
                 [args.width] * string_count,
                 [args.alignment] * string_count,
-                [color[k]] * string_count, # text color black 282828 darkblue 07337a yellow e8e23f darkyellow 07337a  ivory ebe7c5 green 55d97c
+                [color[i%num_color] for i in range(0, string_count)], # text color black 282828 darkblue 07337a yellow e8e23f darkyellow 07337a  ivory ebe7c5 green 55d97c
                 [args.orientation] * string_count,
                 [args.space_width] * string_count,
                 [args.margins] * string_count,
                 [args.fit] * string_count,
                 [args.bbox] * string_count,
                 [args.label_only] * string_count,
-                [bgcolor[k]]* string_count,  # background color : activated when background type is 1 tan dbbe8c red d11204 sky 0781de tan dbbe8c 
-                [skwidth[k]]* string_count,          # stroke width
-                [skcolor[k]]* string_count   # stroke color
+                [bgcolor[i%num_color] for i in range(0, string_count)],  # background color : activated when background type is 1 tan dbbe8c red d11204 sky 0781de tan dbbe8c 
+                [0] * string_count,  # stroke width 0 or 6
+                ['']*string_count   # stroke color
             )
         ), total=args.count):
             pass
-        p.terminate()    
-
-    # if args.name_format == 2:
-    #     # Create file with filename-to-label connections
-    #     with (Path(args.output_dir+"/"+folder[0]+".txt")).open('w', encoding="utf8") as f0:
-    #         with (Path(args.output_dir+"/"+folder[1]+".txt")).open('w', encoding="utf8") as f1:
-    #             for i in range(string_count):
-    #                 file_name = str(i) + "." + args.extension
-    #                 if iFolder[i] == 0:
-    #                     f0.write("{}\t{}\n".format(folder[0]+'/'+file_name, strings[i]))
-    #                 else:
-    #                     f1.write("{}\t{}\n".format(folder[1]+'/'+file_name, strings[i]))
-
-    # total_data = []
-    # imgs = Path(args.output_dir+"/").glob('*.jpg')
-
-    # for img in imgs:
-    #     pkl = img.with_suffix('.pkl')
-    #     with pkl.open('rb') as f:
-    #         data = pickle.load(f)
-
-    #     this_data = {
-    #         'fn' : img.name,
-    #         'charBB' : data['charBB'],
-    #         'txt' : data['txt']
-    #     }
-    #     total_data.append(this_data)
-
-    # with (Path(args.output_dir) / 'gt.pkl').open('wb') as gt:
-    #     pickle.dump(total_data, gt)
-    # print(f'{len(total_data)} data merged!')
+        p.terminate()       
+        rnd.shuffle(iFolder)     
 
 
 if __name__ == '__main__':
