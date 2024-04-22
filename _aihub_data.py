@@ -4,16 +4,16 @@ from PIL import Image
 from pathlib import Path
 
 # AiHub 야외실제촬영 이미지 
-datapath = "/home/jw/data/aihub/train/"
-path1 = datapath + "image/2.책표지/"  # 이미지
-path2 = datapath + "label/2.책표지/"  # 라벨
+datapath = "/home/jw/data/aihub/"
+path1 = datapath + "[원천]Training/1.간판/"  # 이미지
+path2 = datapath + "[라벨]Training/1.간판/"  # 라벨
 
-titles = ["가로형간판","01.총류","02.철학","03.종교","04.사회과학","05.자연과학","06.기술과학","07.예술","08.언어","09.문학","10.역사","11.기타"]
-category = titles[8]  ### change for each iteration
+titles = ["가로형간판1","01.총류","02.철학","03.종교","04.사회과학","05.자연과학","06.기술과학","07.예술","08.언어","09.문학","10.역사","11.기타"]
+category = titles[0]  ### change for each iteration
 folder1 = path1 + category + "/"
 folder2 = path2 + category + "/"
 
-mode = "train3" ### hard code
+mode = "train4" ### hard code
 outimpath = datapath + "out/" + mode + "/temp/"
 
 def jpg2png(): # save jpg images in folder1 to png format
@@ -185,7 +185,7 @@ def text_subset(): #
 # delete_image(0) 
         
 # Step 2. Check if orientation is right. Manually realign image in correct orientation.
-# check_image_orientation()
+check_image_orientation()
             
 # Step 3. convert to jpg images and delete png images
 # png2jpg()
