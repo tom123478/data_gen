@@ -337,7 +337,7 @@ def delete_dup(): # delete duplicate words and make unique words list
     fo.close()
 # delete_dup()
 
-def combine_txt0(): # train0,train1,을 train.txt, val.txt로 통합해줌
+def combine_txt0(): # train0,train1,...을 특정 비율로 train.txt, val.txt로 통합해줌 
     output_dir = "/home/jw/data/ocrdata/en/"
     folder = ['val','train']
     num_folder = len(folder)
@@ -346,7 +346,7 @@ def combine_txt0(): # train0,train1,을 train.txt, val.txt로 통합해줌
     for i in range(num_folder): # val, train
         with (Path(output_dir+folder[i]+".txt")).open('w', encoding="utf-8") as fo:
             for j in range(0 , num_case):
-                dirn = folder[i] + str(j+1) # train0, train1, train2....
+                dirn = folder[i] + str(j) # train0, train1, train2....
                 dir = output_dir + dirn 
                 txtfiles = [str(file) for file in (Path(dir)).glob('*.txt')]
                 num_file = len(txtfiles)
@@ -396,22 +396,22 @@ def combine_txt0(): # train0,train1,을 train.txt, val.txt로 통합해줌
         fo.close()
 
 def combine_txt(): # train0,train1,을 train.txt, val.txt로 통합해줌
-    output_dir = "/home/jw/data/ocrdata/en/"
+    output_dir = "/home/jw/data/ocrdata/ko/"
     folder = ['val','train']
     num_folder = len(folder)
-    num_case = 2    ### specify how many cases to include  
+    num_case = 4    ### specify how many cases to include  
 
     for i in range(num_folder): # val, train
         with (Path(output_dir+folder[i]+".txt")).open('w', encoding="utf-8") as fo:
             for j in range(0 , num_case):
-                dirn = folder[i] + str(j+1) # train0, train1, train2....
+                dirn = folder[i] + str(j+1) # train1, train2....
                 dir = output_dir + dirn 
                 txtfile = dir + ".txt"
                 with (Path(txtfile)).open('r', encoding="utf-8") as f:                    
                     for l in f:
                         fo.write(l)
 
-combine_txt()
+# combine_txt()
         
 def unique_characters(words): # functions to extract unique characters from words list
     unique_chars = set()  # Using a set to store unique characters
@@ -488,7 +488,13 @@ def read_colorcomb(file_i):
 # print(color_font)
 # print(color_back)
 
-def extract_bbox(imfile, boxfile, outpath): # post-process CRAFT to write text bbox images
+def extract_bbox(imfile): # post-process CRAFT to write text bbox images
+    folder = os.path.dirname(imfile)
+    imname, _ = os.path.splitext(os.path.basename(imfile))
+    outpath = folder + '/' + imname + '/'
+    boxfile = folder + '/CRAFT/' + imname + '.txt'
+    # print(outpath)
+    # print(boxfile)
     try:
         os.makedirs(outpath)
     except:
@@ -499,7 +505,6 @@ def extract_bbox(imfile, boxfile, outpath): # post-process CRAFT to write text b
         lines = [' '.join(l.strip().split()) for l in f]        
     f.close()
     num_box = len(lines)
-    imname, _ = os.path.splitext(os.path.basename(imfile))
     for i, l in enumerate(lines):
         xy = l.split(',')
         xmin = min(int(xy[0]), int(xy[6]))  
@@ -513,9 +518,15 @@ def extract_bbox(imfile, boxfile, outpath): # post-process CRAFT to write text b
         cropped_image_path = outpath + '/' + imname + '_' + str(i) + '.jpg'
         cropped_image.save(cropped_image_path)
 
-# extract_bbox('/home/jw/data/ocrdata/test/menu/Dinner-Menu.jpg', 
-#              '/home/jw/data/ocrdata/test/menu/res_Dinner-Menu.txt', 
-#              '/home/jw/data/ocrdata/test/menu/1' )
+# extract_bbox('/home/jw/data/test/맘스터치.jpeg')
+
+def extract_bbox_folder(directory):
+    entries = os.listdir(directory)
+    files = [entry for entry in entries if os.path.isfile(os.path.join(directory, entry))]
+    for file in files:
+        extract_bbox(directory+'/'+file)
+        
+extract_bbox_folder('/home/jw/data/test/')
 
 def color2grey(): # convert color image to grayscale and save it
     for i in range(32):
@@ -526,3 +537,17 @@ def color2grey(): # convert color image to grayscale and save it
         gray.save(outfile)
         
 # color2grey()
+
+def rotate_img(imfile):
+    folder = os.path.dirname(imfile)
+    file_name, ext = os.path.splitext(os.path.basename(imfile))
+    
+    try:
+        im = Image.open(imfile)
+    except IOError:
+        print("IO Error", imfile)
+    else:
+        im2 = im.rotate(-90,expand=1)
+        im2.save(imfile)
+ 
+# rotate_img('/home/jw/data/test/청구서.jpg')
