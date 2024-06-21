@@ -32,7 +32,7 @@ def jpg2png(): # save jpg images in imgfolder to png format
             print(num)
     print(str(num) + ' files finished')
 
-def png2jpg(): # save png images in folder 1 to jpg format
+def png2jpg(): # save png images in imgfolder 1 to jpg format
     num = 0
     print(imgfolder + " processing...")
     for file in Path(imgfolder).glob('*.png'):
@@ -198,18 +198,11 @@ def text_subset(): #
                 # print('processed')
             prevtext = text1
 
-# Step . Convert to png images (30분 정도 걸림) and delete jpg images. Not needed!
-# jpg2png()
-# delete_image(0) 
-        
-# Step 2. Check if orientation is right. Manually realign image in correct orientation.
-# check_image_orientation()
-            
-# Step . convert to jpg images and delete png images. Not needed! 
-# png2jpg()
-# delete_image(1)    
+      
+# Step 1. Check if orientation is right. Manually realign image in correct orientation.
+# check_image_orientation() 
 
-# Step 4. Prepare SimpleDataset according to label/image pairs.
+# Step 2. Prepare SimpleDataset according to label/image pairs.
 # text_subset()
 
 def CRAFT_bbox(inpath): # aihub 이미지를 CRAFT bbox로 타이트하게 만든다. 
