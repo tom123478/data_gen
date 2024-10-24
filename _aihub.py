@@ -286,3 +286,23 @@ mypath = '/home/jw/data/aihub/train3_craft/가로형간판1/'
 # CRAFT_bbox(mypath) # 굳이 안 해도 될 듯...
 # move_img(mypath)
 
+def rotate90(): # list vertical images in folder 1 and rotate 90 degrees
+    imagefolder = '/home/jw/data/test/4/'
+    dir2 = os.listdir(imagefolder)
+    num = 0
+                
+    for i, item in enumerate(dir2):
+        imfile = imagefolder + item
+        try:
+            im = Image.open(imfile)
+        except IOError:
+            print("IO Error", imfile)
+        else:
+            width, height = im.size
+            print(item, str(width), " x ", str(height))
+            # if height < width:
+              
+            newfile = imagefolder + item
+            im2 = im.rotate(180,expand=1)
+            im2.save(newfile)
+rotate90();
