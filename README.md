@@ -1,4 +1,4 @@
-Originally from [openocr](https://github.com/YongWookHa/Open-OCR-Engine)
+Originally from [ocrdata](https://github.com/juwonh/ocrdata.git)
 <br>Generate synthetic ocr data
 
 ## _aihub.py
@@ -7,11 +7,3 @@ Step 2(text_subset) 실행함. path, category, mode 변경해가며 모든 폴�
 
 ## _util.py
 combine_txt(): train0,train1,을 train.txt, val.txt로 통합해줌
-
-## _qa.py
-CRAFT 돌린 후:
-1. 텍스트의 위치에 따라 sorting 해줌.
-sort_bbox(filename)
-2. 텍스트만 crop해서 다른 이미지로 저장해줌
-extract_bbox(filename)
-extract_bbox_folder(directory)
