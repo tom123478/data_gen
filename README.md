@@ -2,7 +2,7 @@ Originally from [ocrdata](https://github.com/juwonh/ocrdata.git)
 <br>Generate synthetic ocr data
 
 # 
-If this project helps you, please give me a star.
+If this project helps you, please give me a star✨✨.
 
 # 🍅 Advantages of synthetic ocr data
 OCR, especially Chinese OCR, is very sensitive to the ratio of characters in the training data. 
