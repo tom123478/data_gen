@@ -1,7 +1,6 @@
 Originally from [ocrdata](https://github.com/juwonh/ocrdata.git)
 <br>Generate synthetic ocr data
 
-# 
 If this project helps you, please give me a star✨✨.
 
 # 🍅 Advantages of synthetic ocr data
