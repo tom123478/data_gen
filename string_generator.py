@@ -24,6 +24,12 @@ def create_strings_from_file(filename, count, mini=10, maxi=40):
 
     return strings
 
+def create_strings_from_muti_files(path,dict=None):
+    """
+        Create all strings by reading lines in specified files
+        path: string files dictionary 
+    """
+    pass
 def create_strings_from_dict(length, allow_variable, count, lang_dict):
     """
         Create all strings by picking X [NOT random] word in the dictionnary
