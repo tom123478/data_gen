@@ -1,13 +1,14 @@
-# Configurations for generating synthetic text data for OCR
+# 配置文件：config.yaml
 
 FILE_SETTINGS:
-  OUTPUT_DIR: "/mnt/Data/kaiyu/Data/OCR/xiaotiancai_char/"
-  INPUT_FILE: ""
+  OUTPUT_DIR: "/Users/weicongcong/Desktop/code/data_gen/ocrdata"
+  INPUT_FILE: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/Company-Shorter-Form1000.txt"
   EXTENSION: "jpg"
   NAME_FORMAT: 2
+  FONT: null  # 如果未指定字体文件，可以设置为null或字体文件路径
 
 TEXT_SETTINGS:
-  LANGUAGE: "en"
+  LANGUAGE: "ch"
   COUNT: 1000
   RANDOM_SEQUENCES: false
   INCLUDE_LETTERS: false
@@ -16,6 +17,8 @@ TEXT_SETTINGS:
   LENGTH: 1
   RANDOM: false
   USE_WIKIPEDIA: false
+  MIN_CHAR: 1  # 添加最小字符数
+  MAX_CHAR: 10  # 添加最大字符数
 
 IMAGE_FORMAT_SETTINGS:
   FORMAT: 32
@@ -24,12 +27,16 @@ IMAGE_FORMAT_SETTINGS:
   ORIENTATION: 0
   TEXT_COLOR: "#282828"
   SPACE_WIDTH: 1.0
+  MARGINS: "5,5,5,5"  # 添加边距设置
+  FIT: false  # 添加是否适应文本大小
+  BBOX: false  # 添加是否生成边界框
+  LABEL_ONLY: false  # 添加是否仅生成标签
 
 DISTORTION_SETTINGS:
   SKEW_ANGLE: 0
   RANDOM_SKEW: false
-  DISTORSION: 0
-  DISTORSION_ORIENTATION: 0
+  DISTORTION: 0
+  DISTORTION_ORIENTATION: 0
 
 BLUR_SETTINGS:
   BLUR: 1
@@ -39,4 +46,3 @@ OTHER_SETTINGS:
   THREAD_COUNT: 5
   BACKGROUND: 0
   HANDWRITTEN: false
-
