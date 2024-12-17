@@ -1,7 +1,5 @@
 import random as rnd
 import numpy as np
-import pickle
-
 from PIL import Image, ImageFilter, ImageDraw
 from pathlib import Path
 
@@ -9,196 +7,114 @@ import computer_text_generator
 import background_generator
 import distortion_generator
 
+
 def rotate_bboxes(bboxes, degree, rc):
-    def rotate_pts(pts, expand):
-        nonlocal theta, rc
+    """
+    旋转文字的边界框 (bounding boxes)。
+    """
+    def rotate_pts(pts):
         rc, pts = np.array(rc), np.array(pts)
         c, s = np.cos(theta), np.sin(theta)
-        R = np.array(((c,-s), (s, c)))
+        R = np.array(((c, -s), (s, c)))
         res = (rc + R @ (pts - rc)).tolist()
-        return [res[0], res[1]+expand]
+        return res
 
-    res = []
     theta = -degree * np.pi / 180
-    if degree < 0:
-        expand = -rotate_pts(bboxes[-1][2], 0)[1]+ bboxes[-1][2][1]  
-    else:
-        expand = rotate_pts((0,0), 0)[1]
-    
+    res = []
     for bbox in bboxes:
-        rc = ((bbox[2][0] - bbox[0][0])/2, (bbox[2][1] - bbox[0][1])/2)
-        rotated_bbox = [rotate_pts(pts, expand) for pts in bbox]
+        rc = ((bbox[2][0] + bbox[0][0]) / 2, (bbox[2][1] + bbox[0][1]) / 2)  # 中心点
+        rotated_bbox = [rotate_pts(pts) for pts in bbox]
         res.append(rotated_bbox)
     return res
 
-def resize_bboxes(bboxes, ratio, vm, hm):  # vertical_margin, horizontal_margin
+
+def resize_bboxes(bboxes, ratio, vm, hm):
+    """
+    调整边界框大小以适应新的图片尺寸。
+    """
     res = []
     for bbox in bboxes:
         new_bbox = []
         for pts in bbox:
-            new_pts = (int(pts[0]*ratio + hm/2), int(pts[1]*ratio + vm/2))
+            new_pts = (int(pts[0] * ratio + hm / 2), int(pts[1] * ratio + vm / 2))
             new_bbox.append(new_pts)
         res.append(new_bbox)
     return res
 
 class FakeTextDataGenerator(object):
     @classmethod
-    def generate_from_tuple(cls, t):
+    def generate(cls, index, text, font_list, out_dir, cursive, size, extension, skewing_angle,
+                 random_skew, blur, random_blur, background_type, distortion_type, distortion_orientation,
+                 is_handwritten, name_format, width, alignment, text_color, orientation, space_width, margins,
+                 fit, is_bbox, label_only, bgcolor, strokewidth, strokefill, height=0):
         """
-            Same as generate, but takes all parameters as one tuple
+        生成带文本的图像，并保存到指定路径。
         """
-
-        cls.generate(*t)
-
-    @classmethod
-    def generate(cls, index, text, font, out_dir, cursive, size, extension, skewing_angle, random_skew, blur, random_blur, background_type, distortion_type, distortion_orientation, is_handwritten, name_format, width, alignment, text_color, orientation, space_width, margins, fit, is_bbox, label_only, bgcolor, strokewidth, strokefill):
-        image = None
-
+        # 解包边距
         margin_top, margin_left, margin_bottom, margin_right = margins
         horizontal_margin = margin_left + margin_right
         vertical_margin = margin_top + margin_bottom
 
-        ##########################
-        # Create picture of text #
-        ##########################
-        # if is_handwritten:
-        #     if orientation == 1:
-        #         raise ValueError("Vertical handwritten text is unavailable")
-        #     image = handwritten_text_generator.generate(text, text_color, fit)
-        # else:
-        if orientation == 0:  
-            image, bboxes = computer_text_generator.generate(text, font, text_color, size, orientation, space_width, fit, strokewidth, strokefill, cursive)
-        else:
-            image, bboxes = computer_text_generator.generate(text, font, text_color, size, orientation, space_width, fit, strokewidth, strokefill, cursive)
-
-        random_angle = rnd.randint(0-skewing_angle, skewing_angle)
-
-        rotated_img = image.rotate(skewing_angle if not random_skew else random_angle, expand=1)
-
-        rc = (image.size[0], image.size[1])
-        rotated_bboxes = rotate_bboxes(bboxes, skewing_angle if not random_skew else random_angle, rc)
-
-        #############################
-        # Apply distortion to image #
-        #############################
-        if distortion_type == 0:
-            distorted_img = rotated_img # Mind = blown
-        elif distortion_type == 1:
-            distorted_img = distortion_generator.sin(
-                rotated_img,
-                vertical=(distortion_orientation == 0 or distortion_orientation == 2),
-                horizontal=(distortion_orientation == 1 or distortion_orientation == 2)
-            )
-        elif distortion_type == 2:
-            distorted_img = distortion_generator.cos(
-                rotated_img,
-                vertical=(distortion_orientation == 0 or distortion_orientation == 2),
-                horizontal=(distortion_orientation == 1 or distortion_orientation == 2)
-            )
-        else:
-            distorted_img = distortion_generator.random(
-                rotated_img,
-                vertical=(distortion_orientation == 0 or distortion_orientation == 2),
-                horizontal=(distortion_orientation == 1 or distortion_orientation == 2)
-            )
-
-        ##################################
-        # Resize image to desired format #
-        ##################################
-
-        # Horizontal text
-        if orientation == 0:
-            ratio = (float(size - vertical_margin) / float(distorted_img.size[1]))
-            new_width = int(distorted_img.size[0] * ratio)
-            resized_bboxes = resize_bboxes(rotated_bboxes, ratio, vertical_margin, horizontal_margin)
-            resized_img = distorted_img.resize((new_width, size - vertical_margin), Image.ANTIALIAS)
-            background_width = width if width > 0 else new_width + horizontal_margin
-            background_height = size
-        # Vertical text
-        elif orientation == 1:
-            ratio = (float(size - horizontal_margin) / float(distorted_img.size[0]))
-            new_height = int(float(distorted_img.size[1]) * ratio)
-            resized_img = distorted_img.resize((size - horizontal_margin, new_height), Image.ANTIALIAS)
-            resized_bboxes = resize_bboxes(rotated_bboxes, ratio, vertical_margin, horizontal_margin)
-            background_width = size
-            background_height = new_height + vertical_margin
-        else:
-            raise ValueError("Invalid orientation")
-
-        #############################
-        # Generate background image #
-        #############################
-        if background_type == 0:
-            background = background_generator.gaussian_noise(background_height, background_width)
-        elif background_type == 1:
-            background = background_generator.plain_color(background_height, background_width, bgcolor)
-        elif background_type == 2:
-            background = background_generator.quasicrystal(background_height, background_width)
-        else:
-            background = background_generator.picture(background_height, background_width)
-
-        #############################
-        # Place text with alignment #
-        #############################
-
-        new_text_width, _ = resized_img.size
-
-        if alignment == 0 or width == -1:
-            background.paste(resized_img, (margin_left, margin_top), resized_img)
-        elif alignment == 1:
-            background.paste(resized_img, (int(background_width / 2 - new_text_width / 2), margin_top), resized_img)
-        else:
-            background.paste(resized_img, (background_width - new_text_width - margin_right, margin_top), resized_img)
-
-        ##################################
-        # Apply gaussian blur #
-        ##################################
-
-        final_image = background.filter(
-            ImageFilter.GaussianBlur(
-                radius=(blur if not random_blur else rnd.randint(0, blur))
-            )
+        # 生成文字图像及边界框
+        image, bboxes = computer_text_generator.generate(
+            text, font_list, text_color, size, orientation, space_width, fit, strokewidth, strokefill, cursive
         )
 
-        #####################################
-        # Generate name for resulting image #
-        #####################################
-        if name_format == 0:
-            image_name = '{}_{}.{}'.format(text, str(index), extension)
-        elif name_format == 1:
-            image_name = '{}_{}.{}'.format(str(index), text, extension)
-        elif name_format == 2:
-            image_name = '{}.{}'.format(str(index),extension)
-        else: ### image file name 
-            # print('{} is not a valid name format. Using default.'.format(name_format))
-            image_name = '{}.{}'.format(str(index).zfill(6), extension)
+        # 旋转文字图像及边界框
+        random_angle = rnd.randint(-skewing_angle, skewing_angle) if random_skew else skewing_angle
+        rotated_img = image.rotate(random_angle, expand=1)
+        rotated_bboxes = rotate_bboxes(bboxes, random_angle, rotated_img.size)
 
-        # Save the image
-        final_image = final_image.convert('RGB')
-        if is_bbox:
-            pdraw = ImageDraw.Draw(final_image)
-            for bbox in resized_bboxes:
-                pdraw.line(bbox+[bbox[0]], fill='red', width=2)
+        # 扭曲效果应用到旋转后的图像
+        if distortion_type == 1:  # 正弦波扭曲
+            distorted_img = distortion_generator.sin(
+                rotated_img, vertical=(distortion_orientation in [0, 2]), horizontal=(distortion_orientation in [1, 2]))
+        elif distortion_type == 2:  # 余弦波扭曲
+            distorted_img = distortion_generator.cos(
+                rotated_img, vertical=(distortion_orientation in [0, 2]), horizontal=(distortion_orientation in [1, 2]))
+        elif distortion_type == 3:  # 随机扭曲
+            distorted_img = distortion_generator.random(
+                rotated_img, vertical=(distortion_orientation in [0, 2]), horizontal=(distortion_orientation in [1, 2]))
+        else:
+            distorted_img = rotated_img  # 无扭曲
 
-        resultDict = {
-            "fn" : image_name,
-            'charBB': None, 
-            'txt': text
-        }
-        for i, box in enumerate(resized_bboxes):  # box : [lx,ly, rx,ly, rx,ry, lx,ry, '###']
-            charBB = np.array(box).transpose()
-            if i == 0:
-                resultDict['charBB'] = np.dstack((charBB,))
-            else:
-                resultDict['charBB'] = np.dstack((resultDict['charBB'],charBB))
+        # 调整文字图像大小
+        ratio = (size - vertical_margin) / distorted_img.size[1]
+        new_width = int(distorted_img.size[0] * ratio)
+        resized_img = distorted_img.resize((new_width, size - vertical_margin), Image.ANTIALIAS)
 
-        # if not label_only:
-        #     with (Path(out_dir) / image_name).with_suffix('.pkl').open('wb') as pkl:
-        #         if resultDict['charBB'] is None:
-        #             raise ValueError and "charBB is None"
-        #         pickle.dump(resultDict, pkl)
-        
-        # with open(os.path.join(out_dir,'output.txt'), 'a', encoding='utf8') as outfile:
-        #     outfile.write('{}\t{}\n'.format(image_name, text))
-        
-        final_image.save(Path(out_dir) / image_name)
+        # 生成背景图像
+        background_width = width if width > 0 else new_width + horizontal_margin
+        background_height = size
+        if background_type == 0:  # 高斯噪声
+            background = background_generator.gaussian_noise(background_height, background_width)
+        elif background_type == 1:  # 单一颜色
+            background = background_generator.plain_color(background_height, background_width, bgcolor)
+        elif background_type == 2:  # 准晶背景
+            background = background_generator.quasicrystal(background_height, background_width)
+        else:  # 随机图片背景
+            background = background_generator.picture(background_height, background_width)
+
+        # 将文字图像贴到背景上
+        text_position = (margin_left, margin_top)
+        background.paste(resized_img, text_position, resized_img)
+
+        # 截取文字区域
+        crop_left = text_position[0] - margin_left
+        crop_top = text_position[1] - margin_top
+        crop_right = crop_left + new_width + horizontal_margin
+        crop_bottom = crop_top + size
+        cropped_img = background.crop((crop_left, crop_top, crop_right, crop_bottom))
+
+        # 如果指定高度，调整图像大小
+        if height > 0:
+            target_width = int(cropped_img.width * (height / cropped_img.height))
+            cropped_img = cropped_img.resize((target_width, height), Image.ANTIALIAS)
+
+        # 应用模糊效果
+        if blur > 0:
+            cropped_img = cropped_img.filter(ImageFilter.GaussianBlur(radius=blur))
+
+        # 保存图像
+        image_name = f"{str(index).zfill(6)}.{extension}"
+        cropped_img.convert('RGB').save(Path(out_dir) / image_name)

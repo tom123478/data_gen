@@ -56,28 +56,45 @@ def quasicrystal(height, width):
 
 def picture(height, width):
     """
-        Create a background with a picture
+    Create a background with a picture
     """
+    # 函数 picture 定义，用于生成给定宽度和高度的背景图片。
 
-    pictures = os.listdir('./pictures')
+    bg = os.listdir('./bg')
+    # 获取路径 './bg' 中的所有文件名，并存储到列表 bg 中。
 
-    if len(pictures) > 0:
-        pic = Image.open('./pictures/' + pictures[rnd.randint(0, len(pictures) - 1)])
+    if len(bg) > 0:
+        # 如果 bg 文件夹中有图片文件（列表长度大于 0），执行以下逻辑。
+
+        pic = Image.open('./bg/' + bg[rnd.randint(0, len(bg) - 1)])
+        # 随机选择 bg 文件夹中的一个图片文件并打开，作为初始背景图片。
 
         if pic.size[0] < width:
+            # 如果图片的宽度小于目标宽度：
+
             pic = pic.resize([width, int(pic.size[1] * (width / pic.size[0]))], Image.ANTIALIAS)
+            # 将图片按目标宽度进行等比例缩放，保持长宽比。
+
         elif pic.size[1] < height:
+            # 如果图片的高度小于目标高度：
+
             pic.thumbnail([int(pic.size[0] * (height / pic.size[1])), height], Image.ANTIALIAS)
+            # 将图片按目标高度进行等比例缩放，保持长宽比。
 
         if (pic.size[0] == width):
             x = 0
+            # 如果缩放后的图片宽度等于目标宽度，裁剪的起始点 x 为 0。
         else:
             x = rnd.randint(0, pic.size[0] - width)
+            # 否则，在图片宽度范围内随机选择裁剪的起始点 x。
+
         if (pic.size[1] == height):
             y = 0
+            # 如果缩放后的图片高度等于目标高度，裁剪的起始点 y 为 0。
         else:
             y = rnd.randint(0, pic.size[1] - height)
-            
+            # 否则，在图片高度范围内随机选择裁剪的起始点 y。
+
         return pic.crop(
             (
                 x,
@@ -86,5 +103,8 @@ def picture(height, width):
                 y + height,
             )
         )
+        # 按照计算出的起始点 (x, y) 和目标尺寸 (width, height) 对图片进行裁剪并返回裁剪后的图片。
+
     else:
         raise Exception('No images where found in the pictures folder!')
+        # 如果 bg 文件夹中没有图片文件，则抛出异常提示用户。
