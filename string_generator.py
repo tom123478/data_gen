@@ -3,7 +3,7 @@ import re
 import string
 
 def create_strings_from_corpus_file(corpus_file_path):
-    with open(corpus_file_path, 'r', encoding="utf8") as f:
+    with open(corpus_file_path, 'r', encoding="utf-8-sig") as f:
         strings = [l.strip() for l in f]    
         return strings
 

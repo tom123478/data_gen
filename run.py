@@ -7,6 +7,7 @@ from easydict import EasyDict as edict
 from pathlib import Path
 from tqdm import tqdm
 from multiprocessing import Pool
+import re
 
 from string_generator import (
     create_strings_from_dict,
@@ -19,12 +20,7 @@ from data_generator import FakeTextDataGenerator
 def parse_margins(margin_str):
     """
     解析边距参数，将逗号分隔的字符串转换为整数列表。
-
-    参数:
-        margin_str (str): 表示边距的字符串，例如 "5,5,5,5" 或 "5"
-
-    返回:
-        list: 包含四个整数的列表，分别表示上、右、下、左边距。
+    例如 "5,5,5,5" 或 "5"。
     """
     margins = margin_str.split(',')
     if len(margins) == 1:
@@ -35,16 +31,13 @@ def parse_margins(margin_str):
 def parse_args():
     """
     解析命令行参数和配置文件，返回包含所有参数的命名空间对象。
-
-    返回:
-        argparse.Namespace: 包含所有配置参数的对象。
     """
     parser = argparse.ArgumentParser(description="generate synthetic text data")
     parser.add_argument('--cfg', help='path of config file', required=False, type=str, default='configs/config.yaml')
     args = parser.parse_args()
 
     # 加载配置文件
-    with open(args.cfg, 'r') as f:
+    with open(args.cfg, 'r', encoding='utf-8') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         config = edict(config)
 
@@ -54,41 +47,37 @@ def parse_args():
             setattr(args, f"{key.lower()}", config[section][key])
     return args
 
+
 def read_color_combinations(file_path):
     """
-    从文件中读取前景色和背景色的组合。
-
-    参数:
-        file_path (str): 颜色组合文件的路径。
-
-    返回:
-        tuple: 两个列表，分别包含前景色和背景色。
+    从文件中读取前景色和背景色的组合。文件格式示例:
+        (255,0,0) (0,0,0)
+        (128,128,128) (255,255,255)
     """
     with open(file_path, 'r', encoding='utf-8') as f:
-        lines = [' '.join(line.strip().split()) for line in f]
+        lines = [line.strip() for line in f if line.strip()]
 
     font_colors = []
     background_colors = []
+
     for line in lines:
-        color_pair = line.split()
-        font_colors.append(color_pair[0])
-        background_colors.append(color_pair[1])
+        parts = line.split()
+        # 解析前景色
+        font_color = tuple(map(int, parts[0].strip("()").split(",")))
+        # 解析背景色
+        background_color = tuple(map(int, parts[1].strip("()").split(",")))
+        font_colors.append(font_color)
+        background_colors.append(background_color)
 
     return font_colors, background_colors
 
 
 def load_fonts(fonts):
     """
-    加载指定语言的字体列表。
-
-    参数:
-        font (str): 字体文件夹名称，例如 "en"、"ko"。
-
-    返回:
-        list: 字体文件路径的列表。
+    加载指定语言/目录的字体列表。
     """
     font_dir = Path('/Users/weicongcong/Desktop/code/data_gen/ocrdata/fonts') / fonts
-    font_paths = [str(font) for font in font_dir.glob('*')]
+    font_paths = [str(font) for font in font_dir.glob('*') if font.is_file()]
     for index, font_path in enumerate(font_paths):
         print(f"{index} {font_path}")
     return font_paths
@@ -96,90 +85,71 @@ def load_fonts(fonts):
 
 def load_corpus(corpus_file_path):
     """
-    加载字典文件，获取单词列表。
-
-    返回:
-        list: 单词列表。
+    加载语料库文件，返回行列表。
     """
-    with open(corpus_file_path, 'r', encoding="utf-8", errors='ignore') as file:
+    with open(corpus_file_path, 'r', encoding="utf-8-sig", errors='ignore') as file:
         words_list = [line.strip() for line in file if line.strip()]
     return words_list
 
 
-def generate_image_paths(args, total_count):
+def generate_image_paths(args):
     """
-    生成图像保存路径和标签文件。
-
-    参数:
-        args (argparse.Namespace): 包含配置参数的对象。
-        total_count (int): 要生成的图像总数。
-
-    返回:
-        Path: 标签文件的路径。
+    创建输出目录、标签文件的路径，并返回 label_file_path。
     """
-    num_digits = 6
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
 
-    # 创建输出目录
-    output_dir = Path(args.FILE_SETTINGS.OUTPUT_DIR)
     label_file_path = output_dir / 'label.txt'
-    output_images_dir = output_dir / 'images'
-    output_images_dir.mkdir(parents=True, exist_ok=True)  # 确保图像目录存在
+    # touch 确保 label.txt 存在
+    label_file_path.touch(exist_ok=True)
 
-    # 打开标签文件并写入内容
-    with label_file_path.open('w', encoding="utf8") as label_file:
-        for i in range(total_count):
-            # 生成文件名
-            filename = f"{str(i).zfill(num_digits)}.jpg"
-            image_path = output_images_dir / filename
-
-            # 获取对应的标签
-            if i < len(args.strings):  # 防止索引越界
-                label = args.corpus[i]
-            else:
-                label = "unknown"  # 为多余样本提供默认标签
-
-            # 写入标签文件
-            label_file.write(f"{image_path}\t{label}\n")
+    # 为了保持与后续生成图像的目录一致，这里再建立 images 子目录
+    (output_dir / 'images').mkdir(parents=True, exist_ok=True)
 
     return label_file_path
 
+
 def main():
-    """
-    主函数，生成合成文本图像数据。
-    """
     args = parse_args()  # 解析参数
 
     # 加载语料库
     corpus_list = load_corpus(args.corpus)
     print(f"corpus words nums: {len(corpus_list)}")
 
+    # 加载字体
     if args.fonts:
         if Path(args.fonts).exists():
+            # 传入的是一个单字体文件路径
             font_paths = [args.fonts]
         else:
             sys.exit("无法打开指定的字体文件")
     else:
+        # 从某个目录加载所有字体
         font_paths = load_fonts('ch')
 
-    # 计算要生成的图像总数
     num_texts = len(corpus_list)
     num_fonts = len(font_paths)
 
-    print(f"output dir: {args.FILE_SETTINGS.OUTPUT_DIR}")
+    print(f"output dir: {args.output_dir}")
     print(f"corpus nums: {num_texts}")
     print(f"font nums: {num_fonts}")
-    print(f"total generate images: {num_texts}")
 
-    # 生成文本字符串
+    # 根据 corpus_type 生成字符串列表
     if args.corpus_type == "CORPUS":
         print(f"use corpus file: {args.corpus}")
         args.strings = create_strings_from_corpus_file(args.corpus)
     elif args.corpus_type == "RANDOM":
         print("use random sequences from chars")
         args.strings = create_strings_randomly_from_chars(
-            args.length, args.random, args.count,
-            args.include_letters, args.include_numbers, args.include_symbols, args.language
+            length=args.length,
+            allow_variable=args.random,
+            count=args.count,
+            include_letters=args.include_letters,
+            include_numbers=args.include_numbers,
+            include_symbols=args.include_symbols,
+            language=args.language
         )
+        # 如果包含符号，或者其他条件不符合，就做 name_format=2
         if args.include_symbols or not any([args.include_letters, args.include_numbers, args.include_symbols]):
             args.name_format = 2
     else:
@@ -189,7 +159,7 @@ def main():
     total_count = len(args.strings)
     print(f"total strings: {total_count}")
 
-    # 数据增强-旋转和扭曲
+    # 这里演示：根据字符串长度，简单地设定不同 skew_angle & distortion
     skew_angles = []
     distortions = []
     for text in args.strings:
@@ -204,56 +174,77 @@ def main():
             skew_angles.append(0)
             distortions.append(0)
 
+    # cursive_flags 这里写死全为0，也可自行设置不同策略
     cursive_flags = [0] * total_count
-    for i in range(5 * num_texts, 7 * num_texts):
-        cursive_flags[i] = 15
 
-    # 读取颜色组合
-    color_file_path = "/home/jw/data/ocrdata/color_gray.txt"
+    # 读取前景色 & 背景色组合
+    color_file_path = "/Users/weicongcong/Desktop/code/data_gen/ocrdata/color/color.txt"
     font_colors, background_colors = read_color_combinations(color_file_path)
     num_colors = len(font_colors)
+    # 如果你想允许各种背景类型，也可随机: background_types = [rnd.randint(0, 3) for _ in range(num_colors)]
+    # 这里为演示，全部指定为1 => plain_color
     background_types = [1] * num_colors
-    background_types[0] = 0
-    background_types[1] = 0
 
-    # 生成图像路径和标签文件
-    label_path = generate_image_paths(args, total_count)
+    # 创建输出目录/标签文件
+    label_path = generate_image_paths(args)
 
-    # 准备生成图像的参数列表
-    image_params = list(zip(
-        range(total_count), 
-        args.strings, 
-        [font_paths] * total_count,
-        [str(Path(args.output_dir))] * total_count, 
-        cursive_flags,
-        [args.format] * total_count, 
-        [args.extension] * total_count, 
-        skew_angles,
-        [args.random_skew] * total_count, 
-        [args.blur] * total_count, 
-        [args.random_blur] * total_count,
-        [background_types[i % num_colors] for i in range(total_count)],
-        [args.distortion] * total_count, 
-        [args.distortion_orientation] * total_count,
-        [args.handwritten] * total_count, 
-        [args.name_format] * total_count,
-        [args.width] * total_count, 
-        [args.alignment] * total_count,
-        [font_colors[i % num_colors] for i in range(total_count)],
-        [args.orientation] * total_count, 
-        [args.space_width] * total_count,
-        [parse_margins(args.margins)] * total_count, 
-        [args.fit] * total_count,
-        [args.bbox] * total_count, 
-        [args.label_only] * total_count,
-        [background_colors[i % num_colors] for i in range(total_count)], 
-        [0] * total_count, [''] * total_count
-    ))
+    # 构建参数列表：与 FakeTextDataGenerator.generate 的签名一一对应
+    # generate(
+    #   index, text, font_list, out_dir, cursive, size, extension, skewing_angle,
+    #   random_skew, blur, background_type, distortion_type, distortion_orientation,
+    #   width, text_color, orientation, space_width, margins, fit, bgcolor,
+    #   strokewidth, strokefill, label_path, height=0
+    # )
+    
+    # 注意：某些参数在 yaml 里可能是 str，需要自行转换，如 margins
+    #      这里假设已经在 parse_args 时处理或保留为 string
+    margins_str = args.margins
 
-    # 单进程生成图像
+    image_params = []
+    for i in range(total_count):
+        # 选一个颜色组合
+        color_idx = i % num_colors
+        # 将一整套参数打包成 tuple
+        param_tuple = (
+            i,                             # index
+            args.strings[i],              # text
+            font_paths,                   # font_list
+            str(Path(args.output_dir)),   # out_dir
+            cursive_flags[i],             # cursive
+            args.size,                    # size
+            args.extension,               # extension
+            skew_angles[i],               # skewing_angle
+            args.random_skew,             # random_skew
+            args.blur,                    # blur
+            background_types[color_idx],  # background_type
+            distortions[i],               # distortion_type
+            args.distortion_orientation,  # distortion_orientation
+            args.width,                   # width
+            font_colors[color_idx],       # text_color
+            args.orientation,             # orientation
+            args.space_width,             # space_width
+            margins_str,                  # margins
+            args.fit,                     # fit
+            background_colors[color_idx], # bgcolor
+            args.stroke_width,            # strokewidth
+            args.stroke_fill,             # strokefill
+            label_path,                   # label_path
+            args.height                   # height
+        )
+        image_params.append(param_tuple)
+
     print("开始生成图像...")
-    for params in tqdm(image_params, total=total_count):  # tqdm 进度条
-        FakeTextDataGenerator.generate(params)
+
+    # 方式1: 单进程
+    for params in tqdm(image_params, total=total_count):
+        FakeTextDataGenerator.generate(*params)
+
+    # # 方式2: 多进程 (如果你想使用CPU多核加速)
+    # num_workers = getattr(args, 'num_workers', 1)  # 从args里读取或默认1
+    # with Pool(processes=num_workers) as p:
+    #     # imap_unordered 按任意完成顺序返回结果
+    #     for _ in tqdm(p.imap_unordered(FakeTextDataGenerator.generate, image_params), total=total_count):
+    #         pass
 
     print("数据生成完成！")
 

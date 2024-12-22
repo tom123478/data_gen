@@ -1,37 +1,42 @@
-# 配置文件：config.yaml
-
 FILE_SETTINGS:
-  OUTPUT_DIR: "/Users/weicongcong/Desktop/code/data_gen/ocrdata"
-  INPUT_FILE: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/Company-Shorter-Form1000.txt"
-  EXTENSION: "jpg"
-  NAME_FORMAT: 2
-  FONTS: "fonts/ch"  # 如果未指定字体文件，可以设置为null或字体文件路径
+  OUTPUT_DIR: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/data/images"
+  INPUT_FILE: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/ceshi.txt"
+  EXTENSION: "jpg"      # 图像文件扩展名
+  NAME_FORMAT: 2        # 生成的图像命名格式，例如 000001.jpg
+  FONTS: null           # 如果未指定字体文件，可设为 null 或字体文件路径
 
 TEXT_SETTINGS:
   LANGUAGE: "ch"
-  CORPUS: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/Company-Shorter-Form1000.txt"
-  CORPUS_TYPE: "CORPUS"
-  # CORPUS_TYPE: "RANDOM"
+  CORPUS: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/ceshi.txt"
+  CORPUS_TYPE: "CORPUS"   # 或 "RANDOM"
   INCLUDE_LETTERS: False
   INCLUDE_NUMBERS: False
   INCLUDE_SYMBOLS: False
-  LENGTH: 1
+  LENGTH: 0
   RANDOM: False
   USE_WIKIPEDIA: False
-  MIN_CHAR: 1  # 添加最小字符数
-  MAX_CHAR: 10  # 添加最大字符数
+  STROKE_WIDTH: 0
+  STROKE_FILL: "(0,0,0)"
+
+  SIZE: 32                # 初始文字大小（或生成文字图像时的参考高度）
+  MIN_CHAR: 1             # 最小字符数
+  MAX_CHAR: 20            # 最大字符数
+
+  STROKE_WIDTH: 0
+  STROKE_FILL: "(0,0,0)"
+  HEIGHT: 0               # 若 >0，则最终图像高度将会等比缩放到这个值
 
 IMAGE_FORMAT_SETTINGS:
-  FORMAT: 32
-  WIDTH: 1
+  FORMAT: 32              # 比特深度？(或图像格式之类)，实际需求可调整
+  WIDTH: 0                # 若 >0 则为最终图像指定固定宽度；<=0 则自适应
   ALIGNMENT: 1
   ORIENTATION: 0
   TEXT_COLOR: "#282828"
   SPACE_WIDTH: 1.0
-  MARGINS: "5,5,5,5"  # 添加边距设置
-  FIT: False  # 添加是否适应文本大小
-  BBOX: False  # 添加是否生成边界框
-  LABEL_ONLY: False  # 添加是否仅生成标签
+  MARGINS: "5,5,5,5"      # 边距(上,左,下,右)
+  FIT: False              # 是否对文字图做紧凑裁剪
+  BBOX: False             # 是否生成边界框
+  LABEL_ONLY: False       # 是否仅生成标签，不输出图像
 
 DISTORTION_SETTINGS:
   SKEW_ANGLE: 0
@@ -40,10 +45,10 @@ DISTORTION_SETTINGS:
   DISTORTION_ORIENTATION: 0
 
 BLUR_SETTINGS:
-  BLUR: 1
-  RANDOM_BLUR: True
+  BLUR: 0
+  RANDOM_BLUR: False
 
 OTHER_SETTINGS:
   THREAD_COUNT: 5
-  BACKGROUND: 0
+  BACKGROUND: 0           # 背景类型 (0: 高斯噪声, 1: 纯色, 2: 准晶, 3: 随机图片等)
   HANDWRITTEN: False
