@@ -33,22 +33,18 @@ IMAGE_FORMAT_SETTINGS:
   ORIENTATION: 0
   TEXT_COLOR: "#282828"
   SPACE_WIDTH: 1.0
-  MARGINS: "5,5,5,5"      # 边距(上,左,下,右)
+  MARGINS: "5,4,5,4"      # 边距(上,左,下,右)
   FIT: False              # 是否对文字图做紧凑裁剪
   BBOX: False             # 是否生成边界框
   LABEL_ONLY: False       # 是否仅生成标签，不输出图像
 
 DISTORTION_SETTINGS:
-  SKEW_ANGLE: 0
-  RANDOM_SKEW: False
+  SKEW_ANGLE: 10
+  RANDOM_SKEW: True
   DISTORTION: 0
   DISTORTION_ORIENTATION: 0
 
-BLUR_SETTINGS:
-  BLUR: 0
-  RANDOM_BLUR: False
-
 OTHER_SETTINGS:
   THREAD_COUNT: 5
-  BACKGROUND: 0           # 背景类型 (0: 高斯噪声, 1: 纯色, 2: 准晶, 3: 随机图片等)
+  BACKGROUND: 0
   HANDWRITTEN: False

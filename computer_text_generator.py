@@ -41,8 +41,6 @@ def _generate_horizontal_text(
     返回:
         (PIL.Image, [list of char_bbox])，其中 char_bbox 是每个字符在图像中的四点坐标。
     """
-    import random as rnd
-    from PIL import Image, ImageFont, ImageDraw
 
     # 便于后面统一使用的函数 get_char_bbox -> (left, top, right, bottom)
     def get_char_bbox(font, ch):
@@ -113,9 +111,6 @@ def _generate_horizontal_text(
         if b > max_bottom:
             max_bottom = b
 
-    # 如果要在末尾加空格：
-    # total_width += space_width_pixels
-
     # 整行文字的高度
     line_height = max_bottom - min_top
 
@@ -125,6 +120,7 @@ def _generate_horizontal_text(
         return empty_img, []
 
     # ---------- 第三阶段：创建画布并绘制 ----------
+
     txt_img = Image.new('RGBA', (total_width, line_height), (0, 0, 0, 0))
     txt_draw = ImageDraw.Draw(txt_img)
 

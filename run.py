@@ -92,23 +92,6 @@ def load_corpus(corpus_file_path):
     return words_list
 
 
-def generate_image_paths(args):
-    """
-    创建输出目录、标签文件的路径，并返回 label_file_path。
-    """
-    output_dir = Path(args.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-
-    label_file_path = output_dir / 'label.txt'
-    # touch 确保 label.txt 存在
-    label_file_path.touch(exist_ok=True)
-
-    # 为了保持与后续生成图像的目录一致，这里再建立 images 子目录
-    (output_dir / 'images').mkdir(parents=True, exist_ok=True)
-
-    return label_file_path
-
-
 def main():
     args = parse_args()  # 解析参数
 
@@ -159,21 +142,6 @@ def main():
     total_count = len(args.strings)
     print(f"total strings: {total_count}")
 
-    # 这里演示：根据字符串长度，简单地设定不同 skew_angle & distortion
-    skew_angles = []
-    distortions = []
-    for text in args.strings:
-        length = len(text)
-        if length < 5:
-            skew_angles.append(7)
-            distortions.append(1)
-        elif length < 10:
-            skew_angles.append(3)
-            distortions.append(1)
-        else:
-            skew_angles.append(0)
-            distortions.append(0)
-
     # cursive_flags 这里写死全为0，也可自行设置不同策略
     cursive_flags = [0] * total_count
 
@@ -181,23 +149,10 @@ def main():
     color_file_path = "/Users/weicongcong/Desktop/code/data_gen/ocrdata/color/color.txt"
     font_colors, background_colors = read_color_combinations(color_file_path)
     num_colors = len(font_colors)
-    # 如果你想允许各种背景类型，也可随机: background_types = [rnd.randint(0, 3) for _ in range(num_colors)]
-    # 这里为演示，全部指定为1 => plain_color
-    background_types = [1] * num_colors
 
     # 创建输出目录/标签文件
-    label_path = generate_image_paths(args)
+    # label_path = generate_image_paths(args)
 
-    # 构建参数列表：与 FakeTextDataGenerator.generate 的签名一一对应
-    # generate(
-    #   index, text, font_list, out_dir, cursive, size, extension, skewing_angle,
-    #   random_skew, blur, background_type, distortion_type, distortion_orientation,
-    #   width, text_color, orientation, space_width, margins, fit, bgcolor,
-    #   strokewidth, strokefill, label_path, height=0
-    # )
-    
-    # 注意：某些参数在 yaml 里可能是 str，需要自行转换，如 margins
-    #      这里假设已经在 parse_args 时处理或保留为 string
     margins_str = args.margins
 
     image_params = []
@@ -213,11 +168,8 @@ def main():
             cursive_flags[i],             # cursive
             args.size,                    # size
             args.extension,               # extension
-            skew_angles[i],               # skewing_angle
-            args.random_skew,             # random_skew
-            args.blur,                    # blur
-            background_types[color_idx],  # background_type
-            distortions[i],               # distortion_type
+            args.skew_angle,               # skewing_angle
+            args.distortion,               # distortion_type
             args.distortion_orientation,  # distortion_orientation
             args.width,                   # width
             font_colors[color_idx],       # text_color
@@ -228,7 +180,6 @@ def main():
             background_colors[color_idx], # bgcolor
             args.stroke_width,            # strokewidth
             args.stroke_fill,             # strokefill
-            label_path,                   # label_path
             args.height                   # height
         )
         image_params.append(param_tuple)
