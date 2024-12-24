@@ -1,22 +1,24 @@
 import random as rnd  # 引入随机模块，用于生成随机数。
 import numpy as np  # 引入NumPy模块，尽管这里代码中没有用到它。
+from pathlib import Path
 from PIL import Image, ImageColor, ImageFont, ImageDraw, ImageFilter  # 从Pillow库导入图像处理相关模块。
 
 # 主函数，用于生成文字图像及其字符边界框。
-def generate(text, font_list, text_color, font_size, orientation, space_width, 
+def generate(out_dir, text, font_list, text_color, font_size, orientation, space_width, 
              fit, strokewidth, strokefill, cursive):
     if orientation == 0:  # 如果文字方向是水平的。
         # 如果设置了描边宽度，调用带描边的水平文字生成函数。
         if strokewidth > 0:
-            return _generate_horizontal_text_stroke(text, font_list, text_color, font_size, space_width, fit, strokewidth, strokefill)
+            return _generate_horizontal_text_stroke(out_dir,text, font_list, text_color, font_size, space_width, fit, strokewidth, strokefill)
         else:  # 否则调用普通的水平文字生成函数。
-            return _generate_horizontal_text(text, font_list, text_color, font_size, space_width, fit, cursive)
+            return _generate_horizontal_text(out_dir,text, font_list, text_color, font_size, space_width, fit, cursive)
     elif orientation == 1:  # 如果文字方向是垂直的。
-        return _generate_vertical_text(text, font_list, text_color, font_size, space_width, fit)
+        return _generate_vertical_text(out_dir,text, font_list, text_color, font_size, space_width, fit)
     else:  # 如果输入了未知方向，抛出异常。
         raise ValueError("Unknown orientation " + str(orientation))
 
 def _generate_horizontal_text(
+    out_dir,
     text,
     font_list,
     text_color=(0, 0, 0),
@@ -92,8 +94,15 @@ def _generate_horizontal_text(
 
         if bbox is None:
             # 所有字体都不支持该字符，返回空图和空列表
+            # 将不支持的字符记录到图片的父文件夹的txt文件中
+            out_dir = Path(out_dir)
+            out_dir_parent = out_dir.parent
+            label_file = out_dir_parent / "no_support_char_and_corpus.txt"
+            with open(label_file, "a", encoding="utf-8") as f:
+                f.write(f"{str(char)}\t{text}\n")
+            
             empty_img = Image.new('RGBA', (1, 1), (0, 0, 0, 0))
-            return empty_img, []
+            return empty_img, []  
 
         char_bboxes.append(bbox)
         rendered_fonts.append(chosen_font)

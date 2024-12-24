@@ -177,7 +177,6 @@ def main():
             args.space_width,             # space_width
             margins_str,                  # margins
             args.fit,                     # fit
-            background_colors[color_idx], # bgcolor
             args.stroke_width,            # strokewidth
             args.stroke_fill,             # strokefill
             args.height                   # height

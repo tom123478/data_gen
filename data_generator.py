@@ -68,7 +68,6 @@ class FakeTextDataGenerator:
         space_width,
         margins,               # "top,left,bottom,right"
         fit,
-        bgcolor,
         stroke_width,
         stroke_fill,
         height=0               # 若>0，则最终图像高度 = height
@@ -89,6 +88,7 @@ class FakeTextDataGenerator:
         # ----1. 生成文字图 (整行)----
         #    computer_text_generator.generate 返回 (text_img, box_info)
         text_img, _ = computer_text_generator.generate(
+            out_dir,
             text=text,
             font_list=font_list,
             text_color=text_color,
@@ -103,7 +103,7 @@ class FakeTextDataGenerator:
 
         # 如果文字图是空图，则直接返回
         if text_img.size == (1, 1):
-            return None, None
+                return None, None
 
         # ----2. 旋转文字图----
 
