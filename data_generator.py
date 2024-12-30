@@ -76,7 +76,7 @@ class FakeTextDataGenerator:
         1) 生成文字图 (text_img)
         2) 旋转 text_img
         3) 创建背景并将旋转后的文字图贴在背景上
-        4) 其它扭曲 / 缩放 / blur 等处理
+        4) 其它数据增强处理
         5) 保存并写 label
         """
 
@@ -159,59 +159,15 @@ class FakeTextDataGenerator:
         # （调试）查看效果
         background_img.save("debug_after_paste.png")
 
-        # ----4. 接下来做其它扭曲 / 缩放 / blur 等操作----
+        # ----4. 接下来做其它扭曲 / 缩放 / blur 等数据增强操作----
         final_img = background_img
-
-        # 4.1 扭曲
-        if distortion_type == 1:
-            final_img = distortion_generator.sin(
-                final_img,
-                vertical=(distortion_orientation in [0, 2]),
-                horizontal=(distortion_orientation in [1, 2])
-            )
-        elif distortion_type == 2:
-            final_img = distortion_generator.cos(
-                final_img,
-                vertical=(distortion_orientation in [0, 2]),
-                horizontal=(distortion_orientation in [1, 2])
-            )
-        elif distortion_type == 3:
-            final_img = distortion_generator.random(
-                final_img,
-                vertical=(distortion_orientation in [0, 2]),
-                horizontal=(distortion_orientation in [1, 2])
-            )
-
-        # # 4.2 按指定 height 等比缩放，否则按 size 等比
-        # final_h = height if height > 0 else size
-        # if final_h > 0 and final_img.height != final_h:
-        #     ratio = final_h / final_img.height
-        #     new_w = max(1, int(final_img.width * ratio))
-        #     # Pillow>=10 不支持ANTIALIAS，用 LANCZOS 或 Image.Resampling.LANCZOS
-        #     final_img = final_img.resize((new_w, final_h), Image.LANCZOS)
-
-        # # 4.3 若指定 width>0，对宽度做填充或裁剪
-        # if width > 0:
-        #     if final_img.width < width:
-        #         # 右侧填充
-        #         padded_img = Image.new("RGB", (width, final_img.height), (255, 255, 255))
-        #         padded_img.paste(final_img, (0, 0))
-        #         final_img = padded_img
-        #     elif final_img.width > width:
-        #         final_img = final_img.crop((0, 0, width, final_img.height))
-
-        # # 4.4 模糊
-        # if blur > 0:
-        #     final_img = final_img.filter(ImageFilter.GaussianBlur(radius=blur))
-
-        # （可选） final_img.save("debug_final.png")
 
         # ----5. 保存图像----
         out_dir = Path(out_dir)
         out_dir.mkdir(parents=True, exist_ok=True)
         image_name = f"{str(index).zfill(8)}.{extension}"
         save_path = out_dir / image_name
-        final_img.convert("RGB").save(save_path)
+        final_img.save(save_path, quality=95)
 
         # ----6. 写 label.txt----
         parent_dir = out_dir.parent
