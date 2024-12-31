@@ -1,13 +1,13 @@
 FILE_SETTINGS:
   OUTPUT_DIR: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/data/images"
-  INPUT_FILE: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/ceshi.txt"
+  INPUT_FILE: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/Company-Shorter-Form1000.txt"
   EXTENSION: "jpg"      # 图像文件扩展名
   NAME_FORMAT: 2        # 生成的图像命名格式，例如 000001.jpg
   FONTS: null           # 如果未指定字体文件，可设为 null 或字体文件路径
 
 TEXT_SETTINGS:
   LANGUAGE: "ch"
-  CORPUS: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/ceshi.txt"
+  CORPUS: "/Users/weicongcong/Desktop/code/data_gen/ocrdata/texts/Company-Shorter-Form1000.txt"
   CORPUS_TYPE: "CORPUS"   # 或 "RANDOM"
   INCLUDE_LETTERS: False
   INCLUDE_NUMBERS: False
@@ -16,7 +16,8 @@ TEXT_SETTINGS:
   RANDOM: False
   USE_WIKIPEDIA: False
   STROKE_WIDTH: 0
-  STROKE_FILL: "(0,0,0)"
+  STROKE_FILL: "(255,255,255)"
+  COLOR: "(0,0,0)"
 
   SIZE: 32                # 初始文字大小（或生成文字图像时的参考高度）
   MIN_CHAR: 1             # 最小字符数
@@ -48,3 +49,4 @@ OTHER_SETTINGS:
   THREAD_COUNT: 5
   BACKGROUND: 0
   HANDWRITTEN: False
+  NUM_WORKERS: 8

@@ -5,7 +5,6 @@ from pathlib import Path
 
 import computer_text_generator
 import background_generator
-import distortion_generator
 
 def rotate_bboxes(bboxes, degree, rc):
     """
@@ -157,7 +156,7 @@ class FakeTextDataGenerator:
         background_img.paste(rotated_text_img, (rand_x, rand_y), rotated_text_img)
 
         # （调试）查看效果
-        background_img.save("debug_after_paste.png")
+        # background_img.save("debug_after_paste.png")
 
         # ----4. 接下来做其它扭曲 / 缩放 / blur 等数据增强操作----
         final_img = background_img
