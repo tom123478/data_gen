@@ -1,8 +1,7 @@
-<div style="display: flex; align-items: center;">
-  <img src="data/readme/WechatIMG909.jpeg" alt="Kneeling for a Star" width="30" style="margin-right: 12px;">
-  <h1 style="margin: 0;">GNTM: Generative but Natural TextImage Maker</h1>
-</div>
-
+<p>
+  <img src="data/readme/WechatIMG909.jpeg" alt="Kneeling for a Star" width="30" style="vertical-align: middle; margin-right: 8px;">
+  <strong>GNTM: Generative but Natural TextImage Maker</strong>
+</p>
 
 Originally inspired by the amazing [ocrdata](https://github.com/juwonh/ocrdata.git) project, this enhanced version brings you everything you need to generate high-quality synthetic OCR data effortlessly. Whether you're dealing with English, Chinese, or any other script, this tool is built to supercharge your OCR projects. 🚀
 
