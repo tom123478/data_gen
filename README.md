@@ -3,10 +3,11 @@
   GNTM: Generative but Natural TextImage Maker
 </h1>
 
+Originally inspired by the amazing [ocrdata](https://github.com/juwonh/ocrdata.git) project
 
-Originally inspired by the amazing [ocrdata](https://github.com/juwonh/ocrdata.git) project, this enhanced version brings you everything you need to generate high-quality synthetic OCR data effortlessly. Whether you're dealing with English, Chinese, or any other script, this tool is built to supercharge your OCR projects. 🚀
+**If this project lights up your OCR workflow, don’t forget to [⭐ Give us a Star ⭐](#) on GitHub!**  🙇🙇🙇
+Your support motivates us to keep improving and sharing! 🚀🎉
 
-If this project lights up your OCR workflow, don’t forget to give us a star! ⭐⭐⭐ Your support motivates us to keep improving and sharing! 🐔
 
 ### Co-developer
 
