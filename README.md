@@ -1,7 +1,6 @@
-## 🐔 GNTM: Generative but Natural TextImage Maker
-
-<div style="text-align: center;">
-  <img src="data/readme/WechatIMG909.jpeg" alt="Kneeling for a Star" width="200">
+<div style="display: flex; align-items: center;">
+  <img src="data/readme/WechatIMG909.jpeg" alt="Kneeling for a Star" width="30" style="margin-right: 12px;">
+  <h1 style="margin: 0;">GNTM: Generative but Natural TextImage Maker</h1>
 </div>
 
 
