@@ -1,6 +1,5 @@
 import random as rnd
 import numpy as np
-from PIL import Image, ImageFilter, ImageDraw
 from pathlib import Path
 
 import computer_text_generator
@@ -59,8 +58,6 @@ class FakeTextDataGenerator:
         size,                  # 期望的图像/文字参考高度；若 height=0，实际生成图像高度 = size
         extension,
         skewing_angle,
-        distortion_type,
-        distortion_orientation,
         width,                 # 期望的最终图像宽度（<=0则自适应文字宽）
         text_color,
         orientation,

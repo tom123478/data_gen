@@ -65,7 +65,7 @@ def load_fonts(font_or_dir):
     如果 font_or_dir 是文件，则只返回该文件。
     如果是目录，则返回目录下所有文件。
     """
-    p = Path("/Users/weicongcong/Desktop/code/data_gen/ocrdata/fonts/"+font_or_dir)
+    p = Path("fonts/"+font_or_dir)
     if not p.exists():
         sys.exit(f"[Error] Font path does not exist: {font_or_dir}")
 
@@ -171,8 +171,6 @@ def main():
             args.size,
             args.extension,
             args.skew_angle,
-            args.distortion,
-            args.distortion_orientation,
             args.width,
             font_colors[color_idx],
             args.orientation,

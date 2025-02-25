@@ -1,7 +1,7 @@
-<h1>
-  <img src="data/readme/WechatIMG909.jpeg" alt="Kneeling for a Star" width="35" style="vertical-align: middle; margin-right: 8px;">
+<h2>
+  <img src="readme/WechatIMG909.jpeg" alt="Kneeling for a Star" width="35" style="vertical-align: middle; margin-right: 8px;">
   GNTM: Generative but Natural TextImage Maker
-</h1>
+</h2>
 
 Originally inspired by the amazing [ocrdata](https://github.com/juwonh/ocrdata.git) project
 
